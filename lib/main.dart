@@ -1,121 +1,162 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'core/router/app_router.dart';
+import 'core/router/go_router_refresh_stream.dart';
+import 'core/storage/local_storage.dart';
+import 'core/theme/app_theme.dart';
+import 'features/auth/data/data_sources/auth_local_data_source.dart';
+import 'features/auth/data/repo/auth_repo_impl.dart';
+import 'features/auth/domain/repo/auth_repo.dart';
+import 'features/auth/presentation/manager/auth_session_cubit/auth_session_cubit.dart';
+import 'features/auth/presentation/manager/login_cubit/login_cubit.dart';
+import 'features/auth/presentation/manager/signup_cubit/signup_cubit.dart';
+import 'features/browse/data/data_sources/browse_local_data_source.dart';
+import 'features/browse/data/repo/browse_repo_impl.dart';
+import 'features/browse/domain/repo/browse_repo.dart';
+import 'features/browse/presentation/manager/browse_cubit/browse_cubit.dart';
+import 'features/collections/data/data_sources/collections_local_data_source.dart';
+import 'features/collections/data/repo/collections_repo_impl.dart';
+import 'features/collections/domain/repo/collections_repo.dart';
+import 'features/collections/presentation/manager/collections_cubit/collections_cubit.dart';
+import 'features/home/data/data_sources/home_local_data_source.dart';
+import 'features/home/data/repo/home_repo_impl.dart';
+import 'features/home/domain/repo/home_repo.dart';
+import 'features/home/presentation/manager/home_cubit/home_cubit.dart';
+import 'features/model_detail/data/data_sources/model_detail_local_data_source.dart';
+import 'features/model_detail/data/repo/model_detail_repo_impl.dart';
+import 'features/model_detail/domain/repo/model_detail_repo.dart';
+import 'features/profile/data/data_sources/profile_local_data_source.dart';
+import 'features/profile/data/repo/profile_repo_impl.dart';
+import 'features/profile/domain/repo/profile_repo.dart';
+import 'features/profile/presentation/manager/profile_cubit/profile_cubit.dart';
+import 'features/upload/data/repo/upload_repo_impl.dart';
+import 'features/upload/domain/repo/upload_repo.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final storage = InMemoryStorage();
+  final authRepo = AuthRepoImpl(AuthLocalDataSourceImpl(storage));
+  final homeRepo = HomeRepoImpl(HomeLocalDataSourceImpl());
+  final browseRepo = BrowseRepoImpl(BrowseLocalDataSourceImpl());
+  final modelDetailRepo =
+      ModelDetailRepoImpl(ModelDetailLocalDataSourceImpl());
+  final collectionsRepo =
+      CollectionsRepoImpl(CollectionsLocalDataSourceImpl());
+  final profileRepo = ProfileRepoImpl(ProfileLocalDataSourceImpl());
+  final uploadRepo = UploadRepoImpl(UploadLocalDataSource());
+
+  final authSessionCubit = AuthSessionCubit(authRepo);
+  await authSessionCubit.restoreSession();
+
+  runApp(
+    ArchVaultApp(
+      authRepo: authRepo,
+      authSessionCubit: authSessionCubit,
+      homeRepo: homeRepo,
+      browseRepo: browseRepo,
+      modelDetailRepo: modelDetailRepo,
+      collectionsRepo: collectionsRepo,
+      profileRepo: profileRepo,
+      uploadRepo: uploadRepo,
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ArchVaultApp extends StatefulWidget {
+  const ArchVaultApp({
+    super.key,
+    required this.authRepo,
+    required this.authSessionCubit,
+    required this.homeRepo,
+    required this.browseRepo,
+    required this.modelDetailRepo,
+    required this.collectionsRepo,
+    required this.profileRepo,
+    required this.uploadRepo,
+  });
 
-  // This widget is the root of your application.
+  final AuthRepo authRepo;
+  final AuthSessionCubit authSessionCubit;
+  final HomeRepo homeRepo;
+  final BrowseRepo browseRepo;
+  final ModelDetailRepo modelDetailRepo;
+  final CollectionsRepo collectionsRepo;
+  final ProfileRepo profileRepo;
+  final UploadRepo uploadRepo;
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+  State<ArchVaultApp> createState() => _ArchVaultAppState();
+}
+
+class _ArchVaultAppState extends State<ArchVaultApp> {
+  late final GoRouterRefreshStream _refreshListenable;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshListenable =
+        GoRouterRefreshStream(widget.authSessionCubit.stream);
+    _router = AppRouter.create(
+      widget.authSessionCubit,
+      refreshListenable: _refreshListenable,
     );
   }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void dispose() {
+    _refreshListenable.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthRepo>.value(value: widget.authRepo),
+        RepositoryProvider<HomeRepo>.value(value: widget.homeRepo),
+        RepositoryProvider<BrowseRepo>.value(value: widget.browseRepo),
+        RepositoryProvider<ModelDetailRepo>.value(
+          value: widget.modelDetailRepo,
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        RepositoryProvider<CollectionsRepo>.value(
+          value: widget.collectionsRepo,
+        ),
+        RepositoryProvider<ProfileRepo>.value(value: widget.profileRepo),
+        RepositoryProvider<UploadRepo>.value(value: widget.uploadRepo),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthSessionCubit>.value(value: widget.authSessionCubit),
+          BlocProvider(
+            create: (context) => LoginCubit(context.read<AuthRepo>()),
+          ),
+          BlocProvider(
+            create: (context) => SignUpCubit(context.read<AuthRepo>()),
+          ),
+          BlocProvider(
+            create: (context) => HomeCubit(context.read<HomeRepo>()),
+          ),
+          BlocProvider(
+            create: (context) => BrowseCubit(context.read<BrowseRepo>()),
+          ),
+          BlocProvider(
+            create: (context) =>
+                CollectionsCubit(context.read<CollectionsRepo>()),
+          ),
+          BlocProvider(
+            create: (context) => ProfileCubit(context.read<ProfileRepo>()),
+          ),
+        ],
+        child: MaterialApp.router(
+          title: 'ArchVault',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.dark,
+          routerConfig: _router,
+        ),
       ),
     );
   }
