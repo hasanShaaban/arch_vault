@@ -2,30 +2,30 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
-/// Shows a network/asset preview with a graceful fallback placeholder.
+/// `assets/...` → [Image.asset], otherwise → [Image.network].
 class PreviewImage extends StatelessWidget {
   const PreviewImage({
     super.key,
-    this.imageUrl,
+    required this.image,
     this.borderRadius,
     this.fit = BoxFit.cover,
   });
 
-  final String? imageUrl;
+  final String image;
   final BorderRadius? borderRadius;
   final BoxFit fit;
 
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius ?? BorderRadius.zero;
-    final url = imageUrl?.trim();
+    final value = image.trim();
 
     Widget child;
-    if (url == null || url.isEmpty) {
+    if (value.isEmpty) {
       child = const _PreviewFallback();
-    } else if (url.startsWith('assets/')) {
+    } else if (value.startsWith('assets/')) {
       child = Image.asset(
-        url,
+        value,
         fit: fit,
         width: double.infinity,
         height: double.infinity,
@@ -33,7 +33,7 @@ class PreviewImage extends StatelessWidget {
       );
     } else {
       child = Image.network(
-        url,
+        value,
         fit: fit,
         width: double.infinity,
         height: double.infinity,

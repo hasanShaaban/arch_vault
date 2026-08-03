@@ -6,7 +6,7 @@ class BrowseAssetEntity {
     required this.fileFormat,
     required this.rating,
     required this.downloadCount,
-    this.imageUrl,
+    required this.image,
   });
 
   final String id;
@@ -15,7 +15,7 @@ class BrowseAssetEntity {
   final String fileFormat;
   final double rating;
   final int downloadCount;
-  final String? imageUrl;
+  final String image;
 }
 
 enum BrowseSortOption { topRated, mostDownloaded }

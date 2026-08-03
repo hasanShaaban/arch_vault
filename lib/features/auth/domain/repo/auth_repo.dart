@@ -16,6 +16,5 @@ abstract class AuthRepo {
 
   Future<void> signOut();
 
-  /// Mock password-reset request. Backend will send the email later.
   Future<void> requestPasswordReset({required String email});
 }

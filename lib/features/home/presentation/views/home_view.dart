@@ -163,7 +163,7 @@ class _HomeViewState extends State<HomeView> {
                                           subtitle:
                                               '${model.label} · ${model.downloadCount} downloads',
                                           rating: model.rating,
-                                          imageUrl: model.imageUrl,
+                                          image: model.image,
                                           onTap: () => context.go(
                                             AppRoutes.modelDetailPath(model.id),
                                           ),

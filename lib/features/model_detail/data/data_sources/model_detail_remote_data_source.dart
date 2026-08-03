@@ -1,6 +1,5 @@
 import '../models/model_detail_model.dart';
 
-/// Remote model-detail API contract. Wired when Django endpoints are available.
 abstract class ModelDetailRemoteDataSource {
   Future<ModelDetailModel> getById(String id);
 

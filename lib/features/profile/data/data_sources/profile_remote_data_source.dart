@@ -1,6 +1,5 @@
 import '../models/profile_model.dart';
 
-/// Remote profile API contract. Wired when Django endpoints are available.
 abstract class ProfileRemoteDataSource {
   Future<ProfileModel> getProfile();
 }

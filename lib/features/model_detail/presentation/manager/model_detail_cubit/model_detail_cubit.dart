@@ -38,7 +38,7 @@ class ModelDetailCubit extends Cubit<ModelDetailState> {
         polygonCount: _loaded.model.polygonCount,
         author: _loaded.model.author,
         similarIds: _loaded.model.similarIds,
-        imageUrl: _loaded.model.imageUrl,
+        image: _loaded.model.image,
       );
       emit(
         _loaded.copyWith(
@@ -76,7 +76,7 @@ class ModelDetailCubit extends Cubit<ModelDetailState> {
         polygonCount: _loaded.model.polygonCount,
         author: _loaded.model.author,
         similarIds: _loaded.model.similarIds,
-        imageUrl: _loaded.model.imageUrl,
+        image: _loaded.model.image,
       );
       emit(
         _loaded.copyWith(

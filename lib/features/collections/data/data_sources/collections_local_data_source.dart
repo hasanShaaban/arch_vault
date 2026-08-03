@@ -1,4 +1,4 @@
-import '../../../../core/constants/mock_preview_images.dart';
+import '../../../../generated/assets.dart';
 import '../../../home/domain/entities/model_asset_entity.dart';
 import '../models/collection_model.dart';
 
@@ -56,14 +56,14 @@ class CollectionsLocalDataSourceImpl implements CollectionsLocalDataSource {
   ];
 
   final Map<String, List<ModelAssetEntity>> _modelsByCollection = {
-    'c1': [
+    'c1': const [
       ModelAssetEntity(
         id: '1',
         title: 'Modern Villa Atrium',
         label: 'Residential',
         rating: 4.8,
         downloadCount: 310,
-        imageUrl: MockPreviewImages.forId('1'),
+        image: Assets.imagesPreviewsVilla,
       ),
       ModelAssetEntity(
         id: '4',
@@ -71,7 +71,7 @@ class CollectionsLocalDataSourceImpl implements CollectionsLocalDataSource {
         label: 'Residential',
         rating: 4.2,
         downloadCount: 97,
-        imageUrl: MockPreviewImages.forId('4'),
+        image: Assets.imagesPreviewsCourtyard,
       ),
       ModelAssetEntity(
         id: '7',
@@ -79,17 +79,17 @@ class CollectionsLocalDataSourceImpl implements CollectionsLocalDataSource {
         label: 'Residential',
         rating: 4.4,
         downloadCount: 142,
-        imageUrl: MockPreviewImages.forId('7'),
+        image: Assets.imagesPreviewsLobby,
       ),
     ],
-    'c2': [
+    'c2': const [
       ModelAssetEntity(
         id: '2',
         title: 'Glass Office Tower',
         label: 'Commercial',
         rating: 4.5,
         downloadCount: 188,
-        imageUrl: MockPreviewImages.forId('2'),
+        image: Assets.imagesPreviewsTower,
       ),
       ModelAssetEntity(
         id: '5',
@@ -97,7 +97,7 @@ class CollectionsLocalDataSourceImpl implements CollectionsLocalDataSource {
         label: 'Commercial',
         rating: 4.6,
         downloadCount: 221,
-        imageUrl: MockPreviewImages.forId('5'),
+        image: Assets.imagesPreviewsMixedUse,
       ),
       ModelAssetEntity(
         id: '8',
@@ -105,17 +105,17 @@ class CollectionsLocalDataSourceImpl implements CollectionsLocalDataSource {
         label: 'Commercial',
         rating: 4.3,
         downloadCount: 76,
-        imageUrl: MockPreviewImages.forId('8'),
+        image: Assets.imagesPreviewsCourthouse,
       ),
     ],
-    'c3': [
+    'c3': const [
       ModelAssetEntity(
         id: '3',
         title: 'Cultural Pavilion',
         label: 'Public',
         rating: 4.9,
         downloadCount: 412,
-        imageUrl: MockPreviewImages.forId('3'),
+        image: Assets.imagesPreviewsPavilion,
       ),
       ModelAssetEntity(
         id: '6',
@@ -123,7 +123,7 @@ class CollectionsLocalDataSourceImpl implements CollectionsLocalDataSource {
         label: 'Public',
         rating: 4.7,
         downloadCount: 156,
-        imageUrl: MockPreviewImages.forId('6'),
+        image: Assets.imagesPreviewsLibrary,
       ),
       ModelAssetEntity(
         id: '9',
@@ -131,17 +131,17 @@ class CollectionsLocalDataSourceImpl implements CollectionsLocalDataSource {
         label: 'Public',
         rating: 4.5,
         downloadCount: 89,
-        imageUrl: MockPreviewImages.forId('9'),
+        image: Assets.imagesPreviewsHarbor,
       ),
     ],
-    'c4': [
+    'c4': const [
       ModelAssetEntity(
         id: '10',
         title: 'Atrium Reception Shell',
         label: 'Commercial',
         rating: 4.1,
         downloadCount: 64,
-        imageUrl: MockPreviewImages.forId('10'),
+        image: Assets.imagesPreviewsAtrium,
       ),
       ModelAssetEntity(
         id: '11',
@@ -149,7 +149,7 @@ class CollectionsLocalDataSourceImpl implements CollectionsLocalDataSource {
         label: 'Public',
         rating: 4.6,
         downloadCount: 118,
-        imageUrl: MockPreviewImages.forId('11'),
+        image: Assets.imagesPreviewsGallery,
       ),
     ],
   };

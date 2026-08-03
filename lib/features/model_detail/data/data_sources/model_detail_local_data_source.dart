@@ -1,5 +1,5 @@
-import '../../../../core/constants/mock_preview_images.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../generated/assets.dart';
 import '../models/model_detail_model.dart';
 
 abstract class ModelDetailLocalDataSource {
@@ -10,7 +10,7 @@ abstract class ModelDetailLocalDataSource {
 }
 
 class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
-  static final _catalog = <ModelDetailModel>[
+  static const _catalog = <ModelDetailModel>[
     ModelDetailModel(
       id: '1',
       title: 'Modern Villa Atrium',
@@ -23,7 +23,7 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
       polygonCount: 124000,
       author: 'studio_arch',
       similarIds: ['4', '5'],
-      imageUrl: MockPreviewImages.forId('1'),
+      image: Assets.imagesPreviewsVilla,
     ),
     ModelDetailModel(
       id: '2',
@@ -37,7 +37,7 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
       polygonCount: 210000,
       author: 'studio_arch',
       similarIds: ['5', '7'],
-      imageUrl: MockPreviewImages.forId('2'),
+      image: Assets.imagesPreviewsTower,
     ),
     ModelDetailModel(
       id: '3',
@@ -51,7 +51,7 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
       polygonCount: 98000,
       author: 'atelier_north',
       similarIds: ['6', '8'],
-      imageUrl: MockPreviewImages.forId('3'),
+      image: Assets.imagesPreviewsPavilion,
     ),
     ModelDetailModel(
       id: '4',
@@ -65,7 +65,7 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
       polygonCount: 76000,
       author: 'atelier_north',
       similarIds: ['1', '6'],
-      imageUrl: MockPreviewImages.forId('4'),
+      image: Assets.imagesPreviewsCourtyard,
     ),
     ModelDetailModel(
       id: '5',
@@ -79,7 +79,7 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
       polygonCount: 188000,
       author: 'studio_arch',
       similarIds: ['2', '7'],
-      imageUrl: MockPreviewImages.forId('5'),
+      image: Assets.imagesPreviewsMixedUse,
     ),
     ModelDetailModel(
       id: '6',
@@ -93,7 +93,7 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
       polygonCount: 112000,
       author: 'atelier_north',
       similarIds: ['3', '8'],
-      imageUrl: MockPreviewImages.forId('6'),
+      image: Assets.imagesPreviewsLibrary,
     ),
     ModelDetailModel(
       id: '7',
@@ -107,7 +107,7 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
       polygonCount: 64000,
       author: 'studio_arch',
       similarIds: ['2', '5'],
-      imageUrl: MockPreviewImages.forId('7'),
+      image: Assets.imagesPreviewsLobby,
     ),
     ModelDetailModel(
       id: '8',
@@ -121,7 +121,7 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
       polygonCount: 145000,
       author: 'atelier_north',
       similarIds: ['3', '6'],
-      imageUrl: MockPreviewImages.forId('8'),
+      image: Assets.imagesPreviewsCourthouse,
     ),
   ];
 
@@ -145,7 +145,7 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
             title: m.title,
             label: m.label,
             rating: m.rating,
-            imageUrl: m.imageUrl,
+            image: m.image,
           ),
         )
         .toList();
@@ -164,7 +164,6 @@ class ModelDetailLocalDataSourceImpl implements ModelDetailLocalDataSource {
       throw const Failure('Rating must be between 1 and 5');
     }
     final model = await getById(id);
-    // Mock blended rating for UI feedback before backend exists.
     return ((model.rating * 4) + stars) / 5;
   }
 }

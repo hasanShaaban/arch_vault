@@ -100,6 +100,5 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     if (key.isEmpty || !key.contains('@')) {
       throw const AuthFailure('Enter a valid email');
     }
-    // Mock: always succeed so UI can demo the flow before backend exists.
   }
 }

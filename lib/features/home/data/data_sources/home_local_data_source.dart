@@ -1,4 +1,4 @@
-import '../../../../core/constants/mock_preview_images.dart';
+import '../../../../generated/assets.dart';
 import '../models/model_asset_model.dart';
 
 abstract class HomeLocalDataSource {
@@ -9,14 +9,14 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
   @override
   Future<List<ModelAssetModel>> getFeaturedModels() async {
     await Future<void>.delayed(const Duration(milliseconds: 350));
-    return [
+    return const [
       ModelAssetModel(
         id: '1',
         title: 'Modern Villa Atrium',
         label: 'Residential',
         rating: 4.8,
         downloadCount: 310,
-        imageUrl: MockPreviewImages.forId('1'),
+        image: Assets.imagesPreviewsVilla,
       ),
       ModelAssetModel(
         id: '2',
@@ -24,7 +24,7 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
         label: 'Commercial',
         rating: 4.5,
         downloadCount: 188,
-        imageUrl: MockPreviewImages.forId('2'),
+        image: Assets.imagesPreviewsTower,
       ),
       ModelAssetModel(
         id: '3',
@@ -32,7 +32,7 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
         label: 'Public',
         rating: 4.9,
         downloadCount: 412,
-        imageUrl: MockPreviewImages.forId('3'),
+        image: Assets.imagesPreviewsPavilion,
       ),
       ModelAssetModel(
         id: '4',
@@ -40,7 +40,7 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
         label: 'Residential',
         rating: 4.2,
         downloadCount: 97,
-        imageUrl: MockPreviewImages.forId('4'),
+        image: Assets.imagesPreviewsCourtyard,
       ),
       ModelAssetModel(
         id: '5',
@@ -48,7 +48,7 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
         label: 'Commercial',
         rating: 4.6,
         downloadCount: 221,
-        imageUrl: MockPreviewImages.forId('5'),
+        image: Assets.imagesPreviewsMixedUse,
       ),
       ModelAssetModel(
         id: '6',
@@ -56,7 +56,7 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
         label: 'Public',
         rating: 4.7,
         downloadCount: 156,
-        imageUrl: MockPreviewImages.forId('6'),
+        image: Assets.imagesPreviewsLibrary,
       ),
     ];
   }

@@ -10,7 +10,7 @@ class ModelDetailEntity {
     required this.polygonCount,
     required this.author,
     required this.similarIds,
-    this.imageUrl,
+    required this.image,
   });
 
   final String id;
@@ -23,7 +23,7 @@ class ModelDetailEntity {
   final int polygonCount;
   final String author;
   final List<String> similarIds;
-  final String? imageUrl;
+  final String image;
 }
 
 class SimilarModelEntity {
@@ -32,12 +32,12 @@ class SimilarModelEntity {
     required this.title,
     required this.label,
     required this.rating,
-    this.imageUrl,
+    required this.image,
   });
 
   final String id;
   final String title;
   final String label;
   final double rating;
-  final String? imageUrl;
+  final String image;
 }

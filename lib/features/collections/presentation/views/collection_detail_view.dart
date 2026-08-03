@@ -106,7 +106,7 @@ class _CollectionDetailBody extends StatelessWidget {
                         title: model.title,
                         subtitle: model.label,
                         rating: model.rating,
-                        imageUrl: model.imageUrl,
+                        image: model.image,
                         onTap: () =>
                             context.go(AppRoutes.modelDetailPath(model.id)),
                       );

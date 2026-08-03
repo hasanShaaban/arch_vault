@@ -90,14 +90,14 @@ class AssetCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.rating,
-    this.imageUrl,
+    required this.image,
     this.onTap,
   });
 
   final String title;
   final String subtitle;
   final double rating;
-  final String? imageUrl;
+  final String image;
   final VoidCallback? onTap;
 
   @override
@@ -118,7 +118,7 @@ class AssetCard extends StatelessWidget {
           children: [
             Expanded(
               child: PreviewImage(
-                imageUrl: imageUrl,
+                image: image,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(8),
                 ),

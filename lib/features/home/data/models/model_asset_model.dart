@@ -7,7 +7,7 @@ class ModelAssetModel {
     required this.label,
     required this.rating,
     required this.downloadCount,
-    this.imageUrl,
+    required this.image,
   });
 
   final String id;
@@ -15,7 +15,7 @@ class ModelAssetModel {
   final String label;
   final double rating;
   final int downloadCount;
-  final String? imageUrl;
+  final String image;
 
   ModelAssetEntity toEntity() => ModelAssetEntity(
         id: id,
@@ -23,6 +23,6 @@ class ModelAssetModel {
         label: label,
         rating: rating,
         downloadCount: downloadCount,
-        imageUrl: imageUrl,
+        image: image,
       );
 }

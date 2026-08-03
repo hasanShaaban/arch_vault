@@ -37,7 +37,7 @@ class ProfileAssetModel {
     required this.label,
     required this.rating,
     required this.isPopular,
-    this.imageUrl,
+    required this.image,
   });
 
   final String id;
@@ -45,7 +45,7 @@ class ProfileAssetModel {
   final String label;
   final double rating;
   final bool isPopular;
-  final String? imageUrl;
+  final String image;
 
   ProfileAssetEntity toEntity() => ProfileAssetEntity(
         id: id,
@@ -53,6 +53,6 @@ class ProfileAssetModel {
         label: label,
         rating: rating,
         isPopular: isPopular,
-        imageUrl: imageUrl,
+        image: image,
       );
 }

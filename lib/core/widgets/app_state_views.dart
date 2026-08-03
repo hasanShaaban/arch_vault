@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
-/// Shared empty-state panel for list screens.
 class AppEmptyState extends StatelessWidget {
   const AppEmptyState({
     super.key,
@@ -62,7 +61,6 @@ class AppEmptyState extends StatelessWidget {
   }
 }
 
-/// Shared error-state panel with optional retry.
 class AppErrorState extends StatelessWidget {
   const AppErrorState({
     super.key,

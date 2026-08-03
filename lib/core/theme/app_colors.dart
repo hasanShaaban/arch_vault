@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // From YAML frontmatter (Material 3 style)
   static const Color surface = Color(0xFF0e1416);
   static const Color surfaceDim = Color(0xFF0e1416);
   static const Color surfaceBright = Color(0xFF343a3c);
@@ -58,7 +57,6 @@ class AppColors {
   static const Color onBackground = Color(0xFFdde3e6);
   static const Color surfaceVariant = Color(0xFF2f3638);
   
-  // From Brand & Style section (Explicit references)
   static const Color brandPrimaryBackground = Color(0xFF191e2b);
   static const Color brandSecondarySurface = Color(0xFF253045);
   static const Color brandAccentPrimary = Color(0xFF00c6e6);

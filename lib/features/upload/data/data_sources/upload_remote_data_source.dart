@@ -1,6 +1,5 @@
 import '../../domain/entities/upload_draft_entity.dart';
 
-/// Remote upload API contract. Wired when Django endpoints are available.
 abstract class UploadRemoteDataSource {
   Future<List<AiLabelScore>> classifyMock({
     required String fileName,

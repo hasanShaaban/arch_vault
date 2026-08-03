@@ -226,7 +226,7 @@ class _ProfileBody extends StatelessWidget {
                 title: asset.title,
                 subtitle: asset.label,
                 rating: asset.rating,
-                imageUrl: asset.imageUrl,
+                image: asset.image,
                 onTap: () => context.go(AppRoutes.modelDetailPath(asset.id)),
               );
             },

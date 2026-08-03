@@ -8,7 +8,7 @@ class BrowseAssetModel {
     required this.fileFormat,
     required this.rating,
     required this.downloadCount,
-    this.imageUrl,
+    required this.image,
   });
 
   final String id;
@@ -17,7 +17,7 @@ class BrowseAssetModel {
   final String fileFormat;
   final double rating;
   final int downloadCount;
-  final String? imageUrl;
+  final String image;
 
   BrowseAssetEntity toEntity() => BrowseAssetEntity(
         id: id,
@@ -26,6 +26,6 @@ class BrowseAssetModel {
         fileFormat: fileFormat,
         rating: rating,
         downloadCount: downloadCount,
-        imageUrl: imageUrl,
+        image: image,
       );
 }

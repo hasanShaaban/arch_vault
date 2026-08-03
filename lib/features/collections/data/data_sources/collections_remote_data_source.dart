@@ -1,7 +1,6 @@
 import '../../../home/domain/entities/model_asset_entity.dart';
 import '../models/collection_model.dart';
 
-/// Remote collections API contract. Wired when Django endpoints are available.
 abstract class CollectionsRemoteDataSource {
   Future<List<CollectionModel>> getCollections();
 

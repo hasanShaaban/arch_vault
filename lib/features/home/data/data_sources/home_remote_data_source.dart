@@ -1,6 +1,5 @@
 import '../models/model_asset_model.dart';
 
-/// Remote home API contract. Wired when Django endpoints are available.
 abstract class HomeRemoteDataSource {
   Future<List<ModelAssetModel>> getFeaturedModels();
 }

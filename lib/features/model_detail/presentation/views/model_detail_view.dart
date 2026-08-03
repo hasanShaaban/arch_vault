@@ -154,7 +154,7 @@ class _ModelDetailBody extends StatelessWidget {
                       title: item.title,
                       subtitle: item.label,
                       rating: item.rating,
-                      imageUrl: item.imageUrl,
+                      image: item.image,
                       onTap: () => context.go(
                         AppRoutes.modelDetailPath(item.id),
                       ),
@@ -189,7 +189,7 @@ class _PreviewPanel extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           PreviewImage(
-            imageUrl: model.imageUrl,
+            image: model.image,
             borderRadius: BorderRadius.circular(12),
           ),
           Positioned(

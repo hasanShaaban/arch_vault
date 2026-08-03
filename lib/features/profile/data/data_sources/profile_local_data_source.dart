@@ -1,4 +1,4 @@
-import '../../../../core/constants/mock_preview_images.dart';
+import '../../../../generated/assets.dart';
 import '../models/profile_model.dart';
 
 abstract class ProfileLocalDataSource {
@@ -9,7 +9,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   @override
   Future<ProfileModel> getProfile() async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    return ProfileModel(
+    return const ProfileModel(
       username: 'studio_arch',
       displayName: 'Studio Arch',
       bio:
@@ -24,7 +24,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
           label: 'Residential',
           rating: 4.8,
           isPopular: true,
-          imageUrl: MockPreviewImages.forId('1'),
+          image: Assets.imagesPreviewsVilla,
         ),
         ProfileAssetModel(
           id: '2',
@@ -32,7 +32,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
           label: 'Commercial',
           rating: 4.5,
           isPopular: true,
-          imageUrl: MockPreviewImages.forId('2'),
+          image: Assets.imagesPreviewsTower,
         ),
         ProfileAssetModel(
           id: '5',
@@ -40,7 +40,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
           label: 'Commercial',
           rating: 4.6,
           isPopular: false,
-          imageUrl: MockPreviewImages.forId('5'),
+          image: Assets.imagesPreviewsMixedUse,
         ),
         ProfileAssetModel(
           id: '7',
@@ -48,7 +48,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
           label: 'Commercial',
           rating: 4.3,
           isPopular: false,
-          imageUrl: MockPreviewImages.forId('7'),
+          image: Assets.imagesPreviewsLobby,
         ),
       ],
     );

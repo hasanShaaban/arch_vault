@@ -1,6 +1,5 @@
 import '../models/browse_asset_model.dart';
 
-/// Remote browse API contract. Wired when Django endpoints are available.
 abstract class BrowseRemoteDataSource {
   Future<List<BrowseAssetModel>> getAssets();
 }

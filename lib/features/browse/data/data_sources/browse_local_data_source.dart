@@ -1,4 +1,4 @@
-import '../../../../core/constants/mock_preview_images.dart';
+import '../../../../generated/assets.dart';
 import '../models/browse_asset_model.dart';
 
 abstract class BrowseLocalDataSource {
@@ -9,7 +9,7 @@ class BrowseLocalDataSourceImpl implements BrowseLocalDataSource {
   @override
   Future<List<BrowseAssetModel>> getAssets() async {
     await Future<void>.delayed(const Duration(milliseconds: 350));
-    return [
+    return const [
       BrowseAssetModel(
         id: '1',
         title: 'Modern Villa Atrium',
@@ -17,7 +17,7 @@ class BrowseLocalDataSourceImpl implements BrowseLocalDataSource {
         fileFormat: 'GLTF',
         rating: 4.8,
         downloadCount: 310,
-        imageUrl: MockPreviewImages.forId('1'),
+        image: Assets.imagesPreviewsVilla,
       ),
       BrowseAssetModel(
         id: '2',
@@ -26,7 +26,7 @@ class BrowseLocalDataSourceImpl implements BrowseLocalDataSource {
         fileFormat: 'FBX',
         rating: 4.5,
         downloadCount: 188,
-        imageUrl: MockPreviewImages.forId('2'),
+        image: Assets.imagesPreviewsTower,
       ),
       BrowseAssetModel(
         id: '3',
@@ -35,7 +35,7 @@ class BrowseLocalDataSourceImpl implements BrowseLocalDataSource {
         fileFormat: 'OBJ',
         rating: 4.9,
         downloadCount: 412,
-        imageUrl: MockPreviewImages.forId('3'),
+        image: Assets.imagesPreviewsPavilion,
       ),
       BrowseAssetModel(
         id: '4',
@@ -44,7 +44,7 @@ class BrowseLocalDataSourceImpl implements BrowseLocalDataSource {
         fileFormat: 'GLTF',
         rating: 4.2,
         downloadCount: 97,
-        imageUrl: MockPreviewImages.forId('4'),
+        image: Assets.imagesPreviewsCourtyard,
       ),
       BrowseAssetModel(
         id: '5',
@@ -53,7 +53,7 @@ class BrowseLocalDataSourceImpl implements BrowseLocalDataSource {
         fileFormat: 'FBX',
         rating: 4.6,
         downloadCount: 221,
-        imageUrl: MockPreviewImages.forId('5'),
+        image: Assets.imagesPreviewsMixedUse,
       ),
       BrowseAssetModel(
         id: '6',
@@ -62,7 +62,7 @@ class BrowseLocalDataSourceImpl implements BrowseLocalDataSource {
         fileFormat: 'OBJ',
         rating: 4.7,
         downloadCount: 156,
-        imageUrl: MockPreviewImages.forId('6'),
+        image: Assets.imagesPreviewsLibrary,
       ),
       BrowseAssetModel(
         id: '7',
@@ -71,7 +71,7 @@ class BrowseLocalDataSourceImpl implements BrowseLocalDataSource {
         fileFormat: 'GLTF',
         rating: 4.3,
         downloadCount: 134,
-        imageUrl: MockPreviewImages.forId('7'),
+        image: Assets.imagesPreviewsLobby,
       ),
       BrowseAssetModel(
         id: '8',
@@ -80,7 +80,7 @@ class BrowseLocalDataSourceImpl implements BrowseLocalDataSource {
         fileFormat: 'FBX',
         rating: 4.1,
         downloadCount: 76,
-        imageUrl: MockPreviewImages.forId('8'),
+        image: Assets.imagesPreviewsCourthouse,
       ),
     ];
   }

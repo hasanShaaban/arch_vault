@@ -25,7 +25,7 @@ class ProfileAssetEntity {
     required this.label,
     required this.rating,
     required this.isPopular,
-    this.imageUrl,
+    required this.image,
   });
 
   final String id;
@@ -33,7 +33,7 @@ class ProfileAssetEntity {
   final String label;
   final double rating;
   final bool isPopular;
-  final String? imageUrl;
+  final String image;
 }
 
 enum ProfileTab { all, popular }
