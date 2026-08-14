@@ -4,6 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:arch_vault/core/storage/local_storage.dart';
 import 'package:arch_vault/core/theme/app_theme.dart';
+import 'package:arch_vault/features/admin/data/datasources/admin_local_datasource.dart';
+import 'package:arch_vault/features/admin/data/repositories/admin_repo_impl.dart';
+import 'package:arch_vault/features/admin/presentation/cubit/admin_cubit.dart';
+import 'package:arch_vault/features/admin/presentation/pages/admin_page.dart';
 import 'package:arch_vault/features/auth/data/data_sources/auth_local_data_source.dart';
 import 'package:arch_vault/features/auth/data/repo/auth_repo_impl.dart';
 import 'package:arch_vault/features/auth/presentation/manager/auth_session_cubit/auth_session_cubit.dart';
@@ -51,6 +55,7 @@ void main() {
           CollectionsRepoImpl(CollectionsLocalDataSourceImpl()),
       profileRepo: ProfileRepoImpl(ProfileLocalDataSourceImpl()),
       uploadRepo: UploadRepoImpl(UploadLocalDataSource()),
+      adminRepo: AdminRepoImpl(AdminLocalDataSourceImpl()),
     );
   }
 
@@ -226,5 +231,30 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Modern Villa Atrium'), findsOneWidget);
     expect(find.text('Skyline Lobby'), findsNothing);
+  });
+
+  testWidgets('Admin dashboard loads overview stats', (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(1280, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final adminRepo = AdminRepoImpl(AdminLocalDataSourceImpl());
+
+    await tester.pumpWidget(
+      RepositoryProvider.value(
+        value: adminRepo,
+        child: BlocProvider(
+          create: (_) => AdminCubit(adminRepo),
+          child: MaterialApp(
+            theme: AppTheme.dark,
+            home: const AdminPage(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Open reports'), findsOneWidget);
   });
 }

@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../constants/app_routes.dart';
+import '../../features/admin/domain/repositories/admin_repo.dart';
+import '../../features/admin/presentation/cubit/admin_cubit.dart';
+import '../../features/admin/presentation/pages/admin_page.dart';
 import '../../features/auth/domain/repo/auth_repo.dart';
 import '../../features/auth/presentation/manager/auth_session_cubit/auth_session_cubit.dart';
 import '../../features/auth/presentation/manager/auth_session_cubit/auth_session_state.dart';
@@ -48,9 +51,15 @@ class AppRouter {
 
         final loggedIn = session is AuthSessionAuthenticated;
         final onAuth = _authLocations.contains(state.matchedLocation);
+        final onAdmin = state.matchedLocation == AppRoutes.admin;
 
         if (!loggedIn && !onAuth) return AppRoutes.signIn;
         if (loggedIn && onAuth) return AppRoutes.home;
+        if (onAdmin &&
+            session is AuthSessionAuthenticated &&
+            !session.user.isAdmin) {
+          return AppRoutes.home;
+        }
         return null;
       },
       routes: [
@@ -115,6 +124,15 @@ class AppRouter {
             return BlocProvider(
               create: (context) => MyUploadsCubit(context.read<UploadRepo>()),
               child: const MyUploadsView(),
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.admin,
+          builder: (context, state) {
+            return BlocProvider(
+              create: (context) => AdminCubit(context.read<AdminRepo>()),
+              child: const AdminPage(),
             );
           },
         ),

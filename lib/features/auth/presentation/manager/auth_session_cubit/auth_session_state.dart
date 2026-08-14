@@ -23,5 +23,5 @@ class AuthSessionAuthenticated extends AuthSessionState {
   final UserEntity user;
 
   @override
-  List<Object?> get props => [user.id, user.email, user.username];
+  List<Object?> get props => [user.id, user.email, user.username, user.role];
 }

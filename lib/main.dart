@@ -6,6 +6,9 @@ import 'core/router/app_router.dart';
 import 'core/router/go_router_refresh_stream.dart';
 import 'core/storage/local_storage.dart';
 import 'core/theme/app_theme.dart';
+import 'features/admin/data/datasources/admin_local_datasource.dart';
+import 'features/admin/data/repositories/admin_repo_impl.dart';
+import 'features/admin/domain/repositories/admin_repo.dart';
 import 'features/auth/data/data_sources/auth_local_data_source.dart';
 import 'features/auth/data/repo/auth_repo_impl.dart';
 import 'features/auth/domain/repo/auth_repo.dart';
@@ -47,6 +50,7 @@ Future<void> main() async {
       CollectionsRepoImpl(CollectionsLocalDataSourceImpl());
   final profileRepo = ProfileRepoImpl(ProfileLocalDataSourceImpl());
   final uploadRepo = UploadRepoImpl(UploadLocalDataSource());
+  final adminRepo = AdminRepoImpl(AdminLocalDataSourceImpl());
 
   final authSessionCubit = AuthSessionCubit(authRepo);
   await authSessionCubit.restoreSession();
@@ -61,6 +65,7 @@ Future<void> main() async {
       collectionsRepo: collectionsRepo,
       profileRepo: profileRepo,
       uploadRepo: uploadRepo,
+      adminRepo: adminRepo,
     ),
   );
 }
@@ -76,6 +81,7 @@ class ArchVaultApp extends StatefulWidget {
     required this.collectionsRepo,
     required this.profileRepo,
     required this.uploadRepo,
+    required this.adminRepo,
   });
 
   final AuthRepo authRepo;
@@ -86,6 +92,7 @@ class ArchVaultApp extends StatefulWidget {
   final CollectionsRepo collectionsRepo;
   final ProfileRepo profileRepo;
   final UploadRepo uploadRepo;
+  final AdminRepo adminRepo;
 
   @override
   State<ArchVaultApp> createState() => _ArchVaultAppState();
@@ -127,6 +134,7 @@ class _ArchVaultAppState extends State<ArchVaultApp> {
         ),
         RepositoryProvider<ProfileRepo>.value(value: widget.profileRepo),
         RepositoryProvider<UploadRepo>.value(value: widget.uploadRepo),
+        RepositoryProvider<AdminRepo>.value(value: widget.adminRepo),
       ],
       child: MultiBlocProvider(
         providers: [

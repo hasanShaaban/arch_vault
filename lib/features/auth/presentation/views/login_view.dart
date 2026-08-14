@@ -153,7 +153,8 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Demo: demo@archvault.com / password123',
+                            'Admin: demo@archvault.com / password123\n'
+                            'User: user@archvault.com / password123',
                             textAlign: TextAlign.center,
                             style: AppTextStyles.labelMd.copyWith(
                               color: AppColors.onSurfaceVariant,

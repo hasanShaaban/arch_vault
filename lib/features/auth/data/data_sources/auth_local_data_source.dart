@@ -30,6 +30,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   final Map<String, String> _passwords = {
     'demo@archvault.com': 'password123',
+    'user@archvault.com': 'password123',
   };
 
   final Map<String, UserModel> _users = {
@@ -37,6 +38,13 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       id: '1',
       email: 'demo@archvault.com',
       username: 'studio_arch',
+      role: 'admin',
+    ),
+    'user@archvault.com': const UserModel(
+      id: '2',
+      email: 'user@archvault.com',
+      username: 'nova_design',
+      role: 'user',
     ),
   };
 
@@ -74,6 +82,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       email: key,
       username: username.trim(),
+      role: 'user',
     );
     _users[key] = user;
     _passwords[key] = password;
