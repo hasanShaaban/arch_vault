@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../constants/app_routes.dart';
 import '../../features/auth/domain/repo/auth_repo.dart';
-import '../../features/auth/presentation/manager/auth_session_cubit/auth_session_cubit.dart';
-import '../../features/auth/presentation/manager/auth_session_cubit/auth_session_state.dart';
 import '../../features/auth/presentation/manager/forgot_password_cubit/forgot_password_cubit.dart';
 import '../../features/auth/presentation/views/forgot_password_view.dart';
 import '../../features/auth/presentation/views/login_view.dart';
@@ -29,30 +27,9 @@ import '../../features/upload/presentation/views/upload_view.dart';
 class AppRouter {
   AppRouter._();
 
-  static const _authLocations = {
-    AppRoutes.signIn,
-    AppRoutes.signUp,
-    AppRoutes.forgotPassword,
-  };
-
-  static GoRouter create(
-    AuthSessionCubit sessionCubit, {
-    required Listenable refreshListenable,
-  }) {
+  static GoRouter create() {
     return GoRouter(
       initialLocation: AppRoutes.signIn,
-      refreshListenable: refreshListenable,
-      redirect: (context, state) {
-        final session = sessionCubit.state;
-        if (session is AuthSessionUnknown) return null;
-
-        final loggedIn = session is AuthSessionAuthenticated;
-        final onAuth = _authLocations.contains(state.matchedLocation);
-
-        if (!loggedIn && !onAuth) return AppRoutes.signIn;
-        if (loggedIn && onAuth) return AppRoutes.home;
-        return null;
-      },
       routes: [
         GoRoute(
           path: AppRoutes.signIn,
@@ -65,11 +42,7 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.forgotPassword,
           builder: (context, state) {
-            return BlocProvider(
-              create: (context) =>
-                  ForgotPasswordCubit(context.read<AuthRepo>()),
-              child: const ForgotPasswordView(),
-            );
+            return const ForgotPasswordView();
           },
         ),
         GoRoute(

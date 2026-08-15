@@ -153,3 +153,120 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
     );
   }
 }
+
+class ConfirmPasswordTextField extends StatefulWidget {
+  const ConfirmPasswordTextField({
+    super.key,
+    required this.controller,
+    required this.passwordController,
+    this.focusNode,
+    this.textInputAction,
+    this.onFieldSubmitted,
+  });
+
+  final TextEditingController controller;
+  final TextEditingController passwordController;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+
+  @override
+  State<ConfirmPasswordTextField> createState() =>
+      _ConfirmPasswordTextFieldState();
+}
+
+class _ConfirmPasswordTextFieldState extends State<ConfirmPasswordTextField> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppTextField(
+      controller: widget.controller,
+      focusNode: widget.focusNode,
+      textInputAction: widget.textInputAction,
+      onFieldSubmitted: widget.onFieldSubmitted,
+      hintText: 'Confirm Password',
+      obscureText: _obscure,
+      prefixIcon: Padding(
+        padding: const EdgeInsets.all(12),
+        child: SvgPicture.asset(
+          Assets.iconsPassword,
+          width: 20,
+          height: 20,
+          colorFilter: const ColorFilter.mode(
+            AppColors.onSurfaceVariant,
+            BlendMode.srcIn,
+          ),
+        ),
+      ),
+      suffixIcon: IconButton(
+        onPressed: () => setState(() => _obscure = !_obscure),
+        icon: Icon(
+          _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+          color: AppColors.onSurfaceVariant,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please confirm your password';
+        }
+        if (value != widget.passwordController.text) {
+          return 'Passwords do not match';
+        }
+        return null;
+      },
+    );
+  }
+}
+
+class RoleDropdownField extends StatelessWidget {
+  const RoleDropdownField({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String value;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: 'Select Role',
+        prefixIcon: const Icon(
+          Icons.badge_outlined,
+          color: AppColors.onSurfaceVariant,
+        ),
+        filled: true,
+        fillColor: AppColors.brandPrimaryBackground,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+            color: AppColors.brandAccentPrimary,
+            width: 1.5,
+          ),
+        ),
+      ),
+      dropdownColor: AppColors.brandSecondarySurface,
+      items: const [
+        DropdownMenuItem(value: 'designer', child: Text('Designer')),
+        DropdownMenuItem(value: 'admin', child: Text('Admin')),
+      ],
+    );
+  }
+}

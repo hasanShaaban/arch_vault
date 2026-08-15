@@ -13,11 +13,15 @@ class LoginCubit extends Cubit<LoginState> {
     required String password,
   }) async {
     emit(const LoginLoading());
-    try {
-      final user = await _authRepo.signIn(email: email, password: password);
-      emit(LoginSuccess(user));
-    } catch (e) {
-      emit(LoginFailureState(e.toString()));
-    }
+
+    final result = await _authRepo.signIn(
+      email: email,
+      password: password,
+    );
+
+    result.fold(
+      (failure) => emit(LoginFailureState(failure.message)),
+      (token) => emit(LoginSuccess(token)),
+    );
   }
 }

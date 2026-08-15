@@ -6,7 +6,6 @@ import '../../../../core/constants/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_widgets.dart';
-import '../manager/auth_session_cubit/auth_session_cubit.dart';
 import '../manager/signup_cubit/signup_cubit.dart';
 import '../manager/signup_cubit/signup_state.dart';
 import 'widget/auth_form_fields.dart';
@@ -23,18 +22,23 @@ class _SignUpViewState extends State<SignUpView> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _usernameFocus = FocusNode();
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
+  String _selectedRole = 'designer';
 
   @override
   void dispose() {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _usernameFocus.dispose();
     _emailFocus.dispose();
     _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
     super.dispose();
   }
 
@@ -43,7 +47,9 @@ class _SignUpViewState extends State<SignUpView> {
     context.read<SignUpCubit>().signUp(
           email: _emailController.text.trim(),
           password: _passwordController.text,
+          confirmPassword: _confirmPasswordController.text,
           username: _usernameController.text.trim(),
+          role: _selectedRole,
         );
   }
 
@@ -69,7 +75,6 @@ class _SignUpViewState extends State<SignUpView> {
               child: BlocConsumer<SignUpCubit, SignUpState>(
                 listener: (context, state) {
                   if (state is SignUpSuccess) {
-                    context.read<AuthSessionCubit>().onSignedIn(state.user);
                     context.go(AppRoutes.home);
                   } else if (state is SignUpFailureState) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -132,8 +137,26 @@ class _SignUpViewState extends State<SignUpView> {
                           PasswordTextField(
                             controller: _passwordController,
                             focusNode: _passwordFocus,
+                            textInputAction: TextInputAction.next,
+                            onFieldSubmitted: (_) =>
+                                _confirmPasswordFocus.requestFocus(),
+                          ),
+                          const SizedBox(height: 12),
+                          ConfirmPasswordTextField(
+                            controller: _confirmPasswordController,
+                            passwordController: _passwordController,
+                            focusNode: _confirmPasswordFocus,
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _submit(),
+                          ),
+                          const SizedBox(height: 12),
+                          RoleDropdownField(
+                            value: _selectedRole,
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _selectedRole = value);
+                              }
+                            },
                           ),
                           const SizedBox(height: 24),
                           PrimaryButton(

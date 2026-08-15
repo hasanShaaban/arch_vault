@@ -1,23 +1,21 @@
-import 'package:arch_vault/core/errors/failure.dart';
 import 'package:arch_vault/features/auth/domain/entities/auth_token_entity.dart';
 import 'package:arch_vault/features/auth/domain/entities/sign_up_response_entity.dart';
-import 'package:dartz/dartz.dart';
 
-abstract class AuthRepo {
-  Future<Either<Failure, AuthTokenEntity>> signIn({
+abstract class AuthRemoteDataSource {
+  Future<AuthTokenEntity> signIn({
     required String email,
     required String password,
   });
 
-  Future<Either<Failure, SignUpResponseEntity>> signUp({
+  Future<SignUpResponseEntity> signUp({
     required String email,
     required String password,
-    required String username,
     required String confirmPassword,
+    required String username,
     required String role,
   });
 
-  // Future<UserEntity?> getCurrentUser();
+  // Future<UserModel?> getCurrentUser();
 
   // Future<void> signOut();
 

@@ -1,3 +1,7 @@
+import 'dart:developer';
+
+import 'package:arch_vault/features/auth/presentation/manager/login_cubit/login_cubit.dart';
+import 'package:arch_vault/features/auth/presentation/manager/login_cubit/login_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,9 +10,6 @@ import '../../../../core/constants/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_widgets.dart';
-import '../manager/auth_session_cubit/auth_session_cubit.dart';
-import '../manager/login_cubit/login_cubit.dart';
-import '../manager/login_cubit/login_state.dart';
 import 'widget/auth_form_fields.dart';
 
 class LoginView extends StatefulWidget {
@@ -37,9 +38,9 @@ class _LoginViewState extends State<LoginView> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     context.read<LoginCubit>().signIn(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
   }
 
   @override
@@ -64,12 +65,12 @@ class _LoginViewState extends State<LoginView> {
               child: BlocConsumer<LoginCubit, LoginState>(
                 listener: (context, state) {
                   if (state is LoginSuccess) {
-                    context.read<AuthSessionCubit>().onSignedIn(state.user);
+                    log('Logged in successfully with ${state.token}');
                     context.go(AppRoutes.home);
                   } else if (state is LoginFailureState) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.message)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(state.message)));
                   }
                 },
                 builder: (context, state) {

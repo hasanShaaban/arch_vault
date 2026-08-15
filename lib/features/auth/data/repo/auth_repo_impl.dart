@@ -1,78 +1,55 @@
-import '../../../../core/errors/failures.dart';
-import '../../domain/entities/user_entity.dart';
+import 'package:arch_vault/core/errors/exception_to_faliure_mapper.dart';
+import 'package:arch_vault/core/errors/exceptions.dart';
+import 'package:arch_vault/core/errors/failure.dart';
+import 'package:arch_vault/features/auth/domain/data_source.dart/auth_remote_data_source.dart';
+import 'package:arch_vault/features/auth/domain/entities/auth_token_entity.dart';
+import 'package:arch_vault/features/auth/domain/entities/sign_up_response_entity.dart';
+import 'package:dartz/dartz.dart';
 import '../../domain/repo/auth_repo.dart';
-import '../data_sources/auth_local_data_source.dart';
 
 class AuthRepoImpl implements AuthRepo {
-  AuthRepoImpl(this._localDataSource);
-
-  final AuthLocalDataSource _localDataSource;
+  final AuthRemoteDataSource authRemoteDataSource;
+  AuthRepoImpl({required this.authRemoteDataSource});
 
   @override
-  Future<UserEntity> signIn({
+  Future<Either<Failure, AuthTokenEntity>> signIn({
     required String email,
     required String password,
   }) async {
     try {
-      final model = await _localDataSource.signIn(
+      final response = await authRemoteDataSource.signIn(
         email: email,
         password: password,
       );
-      return model.toEntity();
-    } on Failure {
-      rethrow;
+      return right(response);
+    } on AppException catch (e) {
+      return left(mapExceptionToFailure(e));
     } catch (_) {
-      throw const AuthFailure('Unexpected sign-in error');
+      return left(UnknownFailure());
     }
   }
 
   @override
-  Future<UserEntity> signUp({
+  Future<Either<Failure, SignUpResponseEntity>> signUp({
     required String email,
     required String password,
     required String username,
+    required String confirmPassword,
+    required String role,
   }) async {
     try {
-      final model = await _localDataSource.signUp(
+      final response = await authRemoteDataSource.signUp(
         email: email,
         password: password,
+        confirmPassword: confirmPassword,
         username: username,
+        role: role,
       );
-      return model.toEntity();
-    } on Failure {
-      rethrow;
+      return right(response);
+    } on AppException catch (e) {
+      return left(mapExceptionToFailure(e));
     } catch (_) {
-      throw const AuthFailure('Unexpected sign-up error');
-    }
-  }
-
-  @override
-  Future<UserEntity?> getCurrentUser() async {
-    try {
-      final model = await _localDataSource.getCurrentUser();
-      return model?.toEntity();
-    } catch (_) {
-      throw const AuthFailure('Unexpected session restore error');
-    }
-  }
-
-  @override
-  Future<void> signOut() async {
-    try {
-      await _localDataSource.signOut();
-    } catch (_) {
-      throw const AuthFailure('Unexpected sign-out error');
-    }
-  }
-
-  @override
-  Future<void> requestPasswordReset({required String email}) async {
-    try {
-      await _localDataSource.requestPasswordReset(email: email);
-    } on Failure {
-      rethrow;
-    } catch (_) {
-      throw const AuthFailure('Unexpected password reset error');
+      return left(UnknownFailure());
     }
   }
 }

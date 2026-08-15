@@ -1,3 +1,4 @@
+import 'package:arch_vault/features/auth/domain/entities/sign_up_response_entity.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/user_entity.dart';
@@ -18,12 +19,16 @@ class SignUpLoading extends SignUpState {
 }
 
 class SignUpSuccess extends SignUpState {
-  const SignUpSuccess(this.user);
+  const SignUpSuccess(this.signUpResponseEntity);
 
-  final UserEntity user;
+  final SignUpResponseEntity signUpResponseEntity;
 
   @override
-  List<Object?> get props => [user.id, user.email];
+  List<Object?> get props => [
+    signUpResponseEntity.email,
+    signUpResponseEntity.username,
+    signUpResponseEntity.role,
+  ];
 }
 
 class SignUpFailureState extends SignUpState {

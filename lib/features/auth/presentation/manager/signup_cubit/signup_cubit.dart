@@ -12,17 +12,20 @@ class SignUpCubit extends Cubit<SignUpState> {
     required String email,
     required String password,
     required String username,
+    required String confirmPassword,
+    required String role,
   }) async {
     emit(const SignUpLoading());
-    try {
-      final user = await _authRepo.signUp(
-        email: email,
-        password: password,
-        username: username,
-      );
-      emit(SignUpSuccess(user));
-    } catch (e) {
-      emit(SignUpFailureState(e.toString()));
-    }
+    final result = await _authRepo.signUp(
+      email: email,
+      password: password,
+      username: username,
+      confirmPassword: confirmPassword,
+      role: role,
+    );
+    result.fold(
+      (failure) => emit(SignUpFailureState(failure.message)),
+      (response) => emit(SignUpSuccess(response)),
+    );
   }
 }

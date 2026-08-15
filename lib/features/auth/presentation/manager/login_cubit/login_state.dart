@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../domain/entities/user_entity.dart';
+import '../../../domain/entities/auth_token_entity.dart';
 
 sealed class LoginState extends Equatable {
   const LoginState();
@@ -18,12 +18,12 @@ class LoginLoading extends LoginState {
 }
 
 class LoginSuccess extends LoginState {
-  const LoginSuccess(this.user);
+  const LoginSuccess(this.token);
 
-  final UserEntity user;
+  final AuthTokenEntity token;
 
   @override
-  List<Object?> get props => [user.id, user.email];
+  List<Object?> get props => [token.access, token.refresh];
 }
 
 class LoginFailureState extends LoginState {

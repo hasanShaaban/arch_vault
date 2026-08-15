@@ -8,7 +8,6 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_state_views.dart';
 import '../../../../core/widgets/app_top_bar.dart';
 import '../../../../core/widgets/app_widgets.dart';
-import '../../../auth/presentation/manager/auth_session_cubit/auth_session_cubit.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../manager/profile_cubit/profile_cubit.dart';
 import '../manager/profile_cubit/profile_state.dart';
@@ -143,7 +142,6 @@ class _ProfileBody extends StatelessWidget {
                   width: 180,
                   child: OutlinedButton.icon(
                     onPressed: () async {
-                      await context.read<AuthSessionCubit>().signOut();
                       if (context.mounted) {
                         context.go(AppRoutes.signIn);
                       }

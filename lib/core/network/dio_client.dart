@@ -1,0 +1,33 @@
+import 'package:arch_vault/core/network/interceptors/auth_interceptor.dart';
+import 'package:arch_vault/core/network/interceptors/error_interceptor.dart';
+import 'package:arch_vault/core/network/network_config.dart';
+import 'package:dio/dio.dart';
+
+import 'interceptors/log_interceptor.dart';
+
+class DioClient {
+  late final Dio dio;
+
+  DioClient({
+    required String baseUrl,  
+    required AuthInterceptor authInterceptor,
+    required ErrorInterceptor errorInterceptor,
+    required LogInterseptor logInterceptor,
+  }) {
+    dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: NetworkConfig.connectTimeout,
+        receiveTimeout: NetworkConfig.receiveTimeout,
+        headers: NetworkConfig.defaultHeaders,
+        responseType: ResponseType.json,
+      ),
+    );
+
+    dio.interceptors.addAll([
+      authInterceptor,
+      errorInterceptor,
+      logInterceptor,
+    ]);
+  }
+}
