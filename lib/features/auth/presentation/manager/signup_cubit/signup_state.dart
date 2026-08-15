@@ -1,8 +1,6 @@
 import 'package:arch_vault/features/auth/domain/entities/sign_up_response_entity.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../domain/entities/user_entity.dart';
-
 sealed class SignUpState extends Equatable {
   const SignUpState();
 

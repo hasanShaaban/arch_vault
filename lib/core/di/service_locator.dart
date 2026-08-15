@@ -6,7 +6,12 @@ import '../network/interceptors/auth_interceptor.dart';
 import '../network/interceptors/error_interceptor.dart';
 import '../network/interceptors/log_interceptor.dart';
 import '../network/network_config.dart';
+import '../storage/hive_local_storage.dart';
 import '../storage/local_storage.dart';
+
+// --- Auth local ---
+import '../../features/auth/data/data_sources/auth_local_data_source_impl.dart';
+import '../../features/auth/domain/data_source.dart/auth_local_data_source.dart';
 
 // --- Auth ---
 import '../../features/auth/data/data_sources/auth_remote_data_source_impl.dart';
@@ -53,10 +58,17 @@ final GetIt sl = GetIt.instance;
 
 Future<void> setupServiceLocator() async {
   // ─── Core / Storage ───────────────────────────────────────────────────────
-  sl.registerLazySingleton<LocalStorage>(() => InMemoryStorage());
+  final hiveStorage = await HiveLocalStorage.init();
+  sl.registerSingleton<LocalStorage>(hiveStorage);
+
+  sl.registerLazySingleton<AuthLocalDataSource>(
+    () => AuthLocalDataSourceImpl(storage: sl<LocalStorage>()),
+  );
 
   // ─── Network ──────────────────────────────────────────────────────────────
-  sl.registerLazySingleton<AuthInterceptor>(() => AuthInterceptor());
+  sl.registerLazySingleton<AuthInterceptor>(
+    () => AuthInterceptor(localDataSource: sl<AuthLocalDataSource>()),
+  );
   sl.registerLazySingleton<ErrorInterceptor>(() => ErrorInterceptor());
   sl.registerLazySingleton<LogInterseptor>(() => LogInterseptor());
 
@@ -77,7 +89,10 @@ Future<void> setupServiceLocator() async {
   );
 
   sl.registerLazySingleton<AuthRepo>(
-    () => AuthRepoImpl(authRemoteDataSource: sl<AuthRemoteDataSource>()),
+    () => AuthRepoImpl(
+      authRemoteDataSource: sl<AuthRemoteDataSource>(),
+      authLocalDataSource: sl<AuthLocalDataSource>(),
+    ),
   );
 
   sl.registerFactory<LoginCubit>(() => LoginCubit(sl<AuthRepo>()));

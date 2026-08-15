@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../constants/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
-import '../../features/auth/presentation/manager/auth_session_cubit/auth_session_state.dart';
 
 class AppTopBar extends StatelessWidget {
   const AppTopBar({super.key, this.searchController, this.onSearchChanged});
