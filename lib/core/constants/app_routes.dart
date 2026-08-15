@@ -12,6 +12,7 @@ class AppRoutes {
   static const String upload = '/upload';
   static const String uploads = '/uploads';
   static const String modelDetail = '/models/:id';
+  static const String admin = '/admin';
 
   static String collectionDetailPath(String id) => '/collections/$id';
   static String modelDetailPath(String id) => '/models/$id';

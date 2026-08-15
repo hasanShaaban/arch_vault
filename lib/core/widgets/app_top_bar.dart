@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../constants/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../../features/auth/presentation/manager/auth_session_cubit/auth_session_state.dart';
 
 class AppTopBar extends StatelessWidget {
-  const AppTopBar({
-    super.key,
-    this.searchController,
-    this.onSearchChanged,
-  });
+  const AppTopBar({super.key, this.searchController, this.onSearchChanged});
 
   final TextEditingController? searchController;
   final ValueChanged<String>? onSearchChanged;
@@ -21,14 +19,22 @@ class AppTopBar extends StatelessWidget {
       context.go(AppRoutes.browse);
       return;
     }
-    context.go(
-      '${AppRoutes.browse}?q=${Uri.encodeQueryComponent(query)}',
-    );
+    context.go('${AppRoutes.browse}?q=${Uri.encodeQueryComponent(query)}');
   }
+
+  // bool _isAdmin(BuildContext context) {//TODO: implement is admin
+  //   try {
+  //     final session = context.read<AuthSessionCubit>().state;
+  //     return session is AuthSessionAuthenticated && session.user.isAdmin;
+  //   } catch (_) {
+  //     return false;
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     final isCompact = MediaQuery.sizeOf(context).width < 980;
+    final isAdmin = false; //TODO: set it to is admin function
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -64,8 +70,9 @@ class AppTopBar extends StatelessWidget {
                 onChanged: onSearchChanged,
                 onSubmitted: (value) => _submitSearch(context, value),
                 textInputAction: TextInputAction.search,
-                style:
-                    AppTextStyles.bodyMd.copyWith(color: AppColors.textWhite),
+                style: AppTextStyles.bodyMd.copyWith(
+                  color: AppColors.textWhite,
+                ),
                 decoration: const InputDecoration(
                   hintText: 'Search models...',
                   prefixIcon: Icon(
@@ -93,19 +100,26 @@ class AppTopBar extends StatelessWidget {
                     context.go(AppRoutes.upload);
                   case 'uploads':
                     context.go(AppRoutes.uploads);
+                  case 'admin':
+                    context.go(AppRoutes.admin);
                   case 'profile':
                     context.go(AppRoutes.profile);
                 }
               },
-              itemBuilder: (context) => const [
-                PopupMenuItem(value: 'browse', child: Text('Browse')),
-                PopupMenuItem(
+              itemBuilder: (context) => [
+                const PopupMenuItem(value: 'browse', child: Text('Browse')),
+                const PopupMenuItem(
                   value: 'collections',
                   child: Text('Collections'),
                 ),
-                PopupMenuItem(value: 'upload', child: Text('Upload')),
-                PopupMenuItem(value: 'uploads', child: Text('My Uploads')),
-                PopupMenuItem(value: 'profile', child: Text('Profile')),
+                const PopupMenuItem(value: 'upload', child: Text('Upload')),
+                const PopupMenuItem(
+                  value: 'uploads',
+                  child: Text('My Uploads'),
+                ),
+                if (isAdmin)
+                  const PopupMenuItem(value: 'admin', child: Text('Admin')),
+                const PopupMenuItem(value: 'profile', child: Text('Profile')),
               ],
             )
           else ...[
@@ -125,6 +139,11 @@ class AppTopBar extends StatelessWidget {
               label: 'My Uploads',
               onTap: () => context.go(AppRoutes.uploads),
             ),
+            if (isAdmin)
+              _NavLink(
+                label: 'Admin',
+                onTap: () => context.go(AppRoutes.admin),
+              ),
             IconButton(
               tooltip: 'Profile',
               onPressed: () => context.go(AppRoutes.profile),
