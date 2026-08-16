@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
@@ -155,10 +156,6 @@ class _FileStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<UploadCubit>();
-    // NOTE: assumes `UploadDraftEntity` exposes the picked file's raw bytes
-    // (needed on Flutter Web, where there is no real filesystem path).
-    // Add a `Uint8List? fileBytes` field to the entity/cubit if it isn't
-    // there yet, and populate it in `pickModelFile()`.
     final Uint8List? fileBytes = form.draft.fileBytes;
     final hasModel = fileBytes != null && form.draft.fileName != null;
 
@@ -471,7 +468,7 @@ class _DetailsStep extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: PrimaryButton(
-                label: 'Run AI Review',
+                label: 'Start Analyze',
                 isLoading: form.isBusy,
                 onPressed: () => cubit.runAiReview(
                   title: titleController.text,
@@ -494,6 +491,10 @@ class _AiReviewStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<UploadCubit>();
+    if (form.isBusy) {
+      return const _AnalysisLoadingWidget();
+    }
+
     final labels = form.draft.aiLabels;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -501,28 +502,47 @@ class _AiReviewStep extends StatelessWidget {
         Text('AI classification results', style: AppTextStyles.headlineSm),
         const SizedBox(height: 8),
         Text(
-          'Mock Vision labels — will be replaced by the real AI pipeline.',
+          'Model category, style, and material classification labels.',
           style: AppTextStyles.bodyMd,
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.brandSecondarySurface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: AppColors.outlineVariant.withValues(alpha: 0.5),
+        if (labels.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.brandSecondarySurface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.outlineVariant.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Text(
+              'No classification labels returned from AI analysis.',
+              style: AppTextStyles.bodyMd.copyWith(
+                color: AppColors.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.brandSecondarySurface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.outlineVariant.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Column(
+              children: [
+                for (final item in labels) ...[
+                  _LabelBar(item: item),
+                  if (item != labels.last) const SizedBox(height: 12),
+                ],
+              ],
             ),
           ),
-          child: Column(
-            children: [
-              for (final item in labels) ...[
-                _LabelBar(item: item),
-                if (item != labels.last) const SizedBox(height: 12),
-              ],
-            ],
-          ),
-        ),
         const SizedBox(height: 20),
         Row(
           children: [
@@ -543,6 +563,97 @@ class _AiReviewStep extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _AnalysisLoadingWidget extends StatefulWidget {
+  const _AnalysisLoadingWidget();
+
+  @override
+  State<_AnalysisLoadingWidget> createState() => _AnalysisLoadingWidgetState();
+}
+
+class _AnalysisLoadingWidgetState extends State<_AnalysisLoadingWidget> {
+  late final Timer _timer;
+  int _secondsElapsed = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _secondsElapsed++;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final statusText =
+        _secondsElapsed < 9 ? 'rendering the model' : 'AI Analyzing';
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: AppColors.brandSecondarySurface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.brandAccentPrimary.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                width: 56,
+                height: 56,
+                child: CircularProgressIndicator(
+                  strokeWidth: 4,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.brandAccentPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: Text(
+                  statusText,
+                  key: ValueKey(statusText),
+                  style: AppTextStyles.headlineSm.copyWith(
+                    color: AppColors.textWhite,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _secondsElapsed < 9
+                    ? 'Preparing 3D environment & generating server-side renders'
+                    : 'Running neural network categorization & material detection',
+                style: AppTextStyles.bodyMd.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/entities/upload_draft_entity.dart';
+import '../../../domain/entities/upload_model_response_entity.dart';
 import '../../../domain/repo/upload_repo.dart';
 import 'upload_state.dart';
 
@@ -67,17 +68,30 @@ class UploadCubit extends Cubit<UploadState> {
     try {
       final result = await FilePicker.pickFiles(
         type: FileType.image,
-        withData: false,
+        // Needed on Flutter Web to get bytes to upload (no filesystem path).
+        withData: true,
       );
       if (result == null || result.files.isEmpty) {
         emit(_form.copyWith(isBusy: false));
         return;
       }
       final file = result.files.first;
+      if (file.bytes == null) {
+        emit(
+          _form.copyWith(
+            isBusy: false,
+            errorMessage: 'Could not read banner image data.',
+          ),
+        );
+        return;
+      }
       emit(
         _form.copyWith(
           isBusy: false,
-          draft: _form.draft.copyWith(bannerImageName: file.name),
+          draft: _form.draft.copyWith(
+            bannerImageName: file.name,
+            bannerImageBytes: file.bytes,
+          ),
           clearError: true,
         ),
       );
@@ -116,24 +130,90 @@ class UploadCubit extends Cubit<UploadState> {
       emit(_form.copyWith(errorMessage: 'Title is required.'));
       return;
     }
-    updateDetails(title: title, description: description);
-
-    emit(_form.copyWith(isBusy: true, clearError: true));
-    try {
-      final labels = await _repo.classifyMock(
-        fileName: _form.draft.fileName!,
-        title: _form.draft.title,
-      );
-      emit(
-        _form.copyWith(
-          isBusy: false,
-          step: UploadStep.aiReview,
-          draft: _form.draft.copyWith(aiLabels: labels),
-        ),
-      );
-    } catch (e) {
-      emit(_form.copyWith(isBusy: false, errorMessage: e.toString()));
+    if (_form.draft.fileBytes == null || _form.draft.fileName == null) {
+      emit(_form.copyWith(errorMessage: '3D model file is required.'));
+      return;
     }
+    if (_form.draft.bannerImageBytes == null ||
+        _form.draft.bannerImageName == null) {
+      emit(_form.copyWith(errorMessage: 'Banner image is required.'));
+      return;
+    }
+
+    final updatedDraft = _form.draft.copyWith(
+      title: title,
+      description: description,
+    );
+
+    emit(
+      _form.copyWith(
+        step: UploadStep.aiReview,
+        isBusy: true,
+        draft: updatedDraft,
+        clearError: true,
+      ),
+    );
+
+    final result = await _repo.uploadModel(updatedDraft);
+
+    result.fold(
+      (failure) {
+        emit(
+          _form.copyWith(
+            isBusy: false,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (response) {
+        final labels = _extractAiLabels(response);
+        emit(
+          _form.copyWith(
+            isBusy: false,
+            draft: updatedDraft.copyWith(aiLabels: labels),
+            responseEntity: response,
+          ),
+        );
+      },
+    );
+  }
+
+  List<AiLabelScore> _extractAiLabels(UploadModelResponseEntity response) {
+    final list = <AiLabelScore>[];
+    final pred = response.prediction;
+    if (pred != null) {
+      if (pred.superCategory != null) {
+        list.add(AiLabelScore(
+          label: 'Super Category: ${pred.superCategory!.label}',
+          confidence: pred.superCategory!.confidence,
+        ));
+      }
+      if (pred.objectCategory != null) {
+        list.add(AiLabelScore(
+          label: 'Object Category: ${pred.objectCategory!.label}',
+          confidence: pred.objectCategory!.confidence,
+        ));
+      }
+      if (pred.materialsPrimary != null) {
+        list.add(AiLabelScore(
+          label: 'Primary Material: ${pred.materialsPrimary!.label}',
+          confidence: pred.materialsPrimary!.confidence,
+        ));
+      }
+      for (final item in pred.styleClass) {
+        list.add(AiLabelScore(
+          label: 'Style: ${item.label}',
+          confidence: item.confidence,
+        ));
+      }
+      for (final item in pred.materialsSecondary) {
+        list.add(AiLabelScore(
+          label: 'Secondary Material: ${item.label}',
+          confidence: item.confidence,
+        ));
+      }
+    }
+    return list;
   }
 
   void back() {

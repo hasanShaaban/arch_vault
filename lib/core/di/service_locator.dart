@@ -1,5 +1,7 @@
 import 'package:arch_vault/features/home/data/data_sources/home_remote_data_source.dart';
 import 'package:arch_vault/features/home/domain/data_source/home_remote_data_sorce.dart';
+import 'package:arch_vault/features/upload/data/data_sources/upload_remote_data_source.dart';
+import 'package:arch_vault/features/upload/domain/data_source/upload_model_remote_data_source.dart';
 import 'package:get_it/get_it.dart';
 
 import '../network/api_service.dart';
@@ -169,9 +171,15 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<UploadLocalDataSource>(
     () => UploadLocalDataSource(),
   );
+  sl.registerLazySingleton<UploadRemoteDataSource>(
+    () => UploadRemoteDataSourceImpl(sl<ApiService>()),
+  );
 
   sl.registerLazySingleton<UploadRepo>(
-    () => UploadRepoImpl(sl<UploadLocalDataSource>()),
+    () => UploadRepoImpl(
+      sl<UploadLocalDataSource>(),
+      sl<UploadRemoteDataSource>(),
+    ),
   );
 
   // ─── Admin ────────────────────────────────────────────────────────────────

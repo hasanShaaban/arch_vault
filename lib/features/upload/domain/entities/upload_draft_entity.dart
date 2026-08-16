@@ -18,6 +18,7 @@ class UploadDraftEntity {
     this.tags = const [],
     this.aiLabels = const [],
     this.fileBytes,
+    this.bannerImageBytes,
   });
 
   final String? fileName;
@@ -26,7 +27,8 @@ class UploadDraftEntity {
   final String? bannerImageName;
   final List<String> tags;
   final List<AiLabelScore> aiLabels;
-  final Uint8List? fileBytes; // add as a field
+  final Uint8List? fileBytes;
+  final Uint8List? bannerImageBytes;
 
   UploadDraftEntity copyWith({
     String? fileName,
@@ -35,7 +37,8 @@ class UploadDraftEntity {
     String? bannerImageName,
     List<String>? tags,
     List<AiLabelScore>? aiLabels,
-    Uint8List? fileBytes, // add as a field
+    Uint8List? fileBytes,
+    Uint8List? bannerImageBytes,
   }) {
     return UploadDraftEntity(
       fileName: fileName ?? this.fileName,
@@ -45,6 +48,7 @@ class UploadDraftEntity {
       tags: tags ?? this.tags,
       aiLabels: aiLabels ?? this.aiLabels,
       fileBytes: fileBytes ?? this.fileBytes,
+      bannerImageBytes: bannerImageBytes ?? this.bannerImageBytes,
     );
   }
 }

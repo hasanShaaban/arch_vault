@@ -1,3 +1,12 @@
+import 'package:arch_vault/core/errors/exception_to_faliure_mapper.dart';
+import 'package:arch_vault/core/errors/exceptions.dart';
+import 'package:arch_vault/core/errors/failure.dart';
+import 'package:arch_vault/features/upload/domain/data_source/upload_model_remote_data_source.dart';
+
+import 'package:arch_vault/features/upload/domain/entities/upload_model_response_entity.dart';
+
+import 'package:dartz/dartz.dart';
+
 import '../../domain/entities/upload_draft_entity.dart';
 import '../../domain/repo/upload_repo.dart';
 
@@ -81,9 +90,10 @@ class UploadLocalDataSource {
 }
 
 class UploadRepoImpl implements UploadRepo {
-  UploadRepoImpl(this._localDataSource);
+  UploadRepoImpl(this._localDataSource, this.uploadRemoteDataSource);
 
   final UploadLocalDataSource _localDataSource;
+  final UploadRemoteDataSource uploadRemoteDataSource;
 
   @override
   Future<List<AiLabelScore>> classifyMock({
@@ -101,5 +111,26 @@ class UploadRepoImpl implements UploadRepo {
   @override
   Future<List<MyUploadEntity>> getMyUploads() {
     return _localDataSource.getMyUploads();
+  }
+
+  @override
+  Future<Either<Failure, UploadModelResponseEntity>> uploadModel(
+    UploadDraftEntity draft,
+  ) async {
+    try {
+      final response = await uploadRemoteDataSource.uploadModel(
+        title: draft.title,
+        description: draft.description,
+        modelBytes: draft.fileBytes!,
+        modelFileName: draft.fileName!,
+        bannerBytes: draft.bannerImageBytes!,
+        bannerFileName: draft.bannerImageName!,
+      );
+      return right(response);
+    } on AppException catch (e) {
+      return left(mapExceptionToFailure(e));
+    } catch (_) {
+      return left(UnknownFailure());
+    }
   }
 }
