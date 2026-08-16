@@ -35,10 +35,10 @@ class UploadRemoteDataSourceImpl implements UploadRemoteDataSource {
     required String description,
     required Uint8List modelBytes,
     required String modelFileName,
-    required Uint8List bannerBytes,
-    required String bannerFileName,
+    Uint8List? bannerBytes,
+    String? bannerFileName,
   }) async {
-    final formData = FormData.fromMap({
+    final Map<String, dynamic> formMap = {
       'title': title,
       'description': description,
       'model': MultipartFile.fromBytes(
@@ -46,12 +46,15 @@ class UploadRemoteDataSourceImpl implements UploadRemoteDataSource {
         filename: modelFileName,
         contentType: MediaType.parse(_modelMimeType(modelFileName)),
       ),
-      'banner': MultipartFile.fromBytes(
+    };
+    if (bannerBytes != null && bannerFileName != null) {
+      formMap['banner'] = MultipartFile.fromBytes(
         bannerBytes,
         filename: bannerFileName,
         contentType: MediaType.parse(_imageMimeType(bannerFileName)),
-      ),
-    });
+      );
+    }
+    final formData = FormData.fromMap(formMap);
     try {
       final response = await apiService.post(
         'models/upload-user/',

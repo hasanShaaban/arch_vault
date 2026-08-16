@@ -123,8 +123,8 @@ class UploadRepoImpl implements UploadRepo {
         description: draft.description,
         modelBytes: draft.fileBytes!,
         modelFileName: draft.fileName!,
-        bannerBytes: draft.bannerImageBytes!,
-        bannerFileName: draft.bannerImageName!,
+        bannerBytes: draft.bannerImageBytes,
+        bannerFileName: draft.bannerImageName,
       );
       return right(response);
     } on AppException catch (e) {

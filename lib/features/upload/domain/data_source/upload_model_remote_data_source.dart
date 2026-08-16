@@ -17,7 +17,7 @@ abstract class UploadRemoteDataSource {
     required String description,
     required Uint8List modelBytes,
     required String modelFileName,
-    required Uint8List bannerBytes,
-    required String bannerFileName,
+    Uint8List? bannerBytes,
+    String? bannerFileName,
   });
 }

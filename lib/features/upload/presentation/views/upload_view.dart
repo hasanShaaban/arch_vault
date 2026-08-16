@@ -436,7 +436,7 @@ class _DetailsStep extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    bannerName ?? 'Upload banner image (PNG, JPG, WebP)',
+                    bannerName ?? 'Upload banner image (optional)',
                     style: AppTextStyles.bodyMd.copyWith(
                       color: bannerName != null
                           ? AppColors.textWhite

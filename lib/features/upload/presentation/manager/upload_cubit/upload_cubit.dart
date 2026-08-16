@@ -134,11 +134,6 @@ class UploadCubit extends Cubit<UploadState> {
       emit(_form.copyWith(errorMessage: '3D model file is required.'));
       return;
     }
-    if (_form.draft.bannerImageBytes == null ||
-        _form.draft.bannerImageName == null) {
-      emit(_form.copyWith(errorMessage: 'Banner image is required.'));
-      return;
-    }
 
     final updatedDraft = _form.draft.copyWith(
       title: title,

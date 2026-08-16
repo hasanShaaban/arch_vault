@@ -74,11 +74,7 @@ class _PreviewFallback extends StatelessWidget {
                 height: 28,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : const Icon(
-                Icons.view_in_ar_rounded,
-                size: 40,
-                color: AppColors.brandAccentPrimary,
-              ),
+            : SizedBox(),
       ),
     );
   }

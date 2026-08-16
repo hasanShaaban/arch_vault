@@ -1,6 +1,12 @@
+import '../../../../features/upload/domain/entities/upload_model_response_entity.dart';
+
 class Model3dEntity {
   const Model3dEntity({
     required this.id,
+    this.title,
+    this.description,
+    this.bannerUrl,
+    this.modelUrl,
     required this.uploadedAt,
     required this.isActive,
     required this.viewsCount,
@@ -13,9 +19,14 @@ class Model3dEntity {
     this.tags = const [],
     this.vertices,
     this.faces,
+    this.predictions,
   });
 
   final String id;
+  final String? title;
+  final String? description;
+  final String? bannerUrl;
+  final String? modelUrl;
 
   final DateTime uploadedAt;
   final bool isActive;
@@ -29,4 +40,5 @@ class Model3dEntity {
   final int downloadsCount;
   final int usageCount;
   final int ratingScore;
+  final ModelPredictionDataEntity? predictions;
 }

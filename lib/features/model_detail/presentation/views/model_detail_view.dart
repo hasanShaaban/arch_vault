@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,56 +13,32 @@ import '../../../../core/widgets/app_widgets.dart';
 import '../../../../core/widgets/auth_gate_dialog.dart';
 import '../../../../core/widgets/preview_image.dart';
 import '../../../../features/auth/presentation/manager/visitor_session_cubit/visitor_session_cubit.dart';
-import '../../domain/entities/model_detail_entity.dart';
-import '../manager/model_detail_cubit/model_detail_cubit.dart';
-import '../manager/model_detail_cubit/model_detail_state.dart';
+import '../../../home/domain/entities/model_3d_entity.dart';
 
 class ModelDetailView extends StatelessWidget {
-  const ModelDetailView({super.key, required this.modelId});
+  const ModelDetailView({super.key, required this.modelId, this.model});
 
   final String modelId;
+  final Model3dEntity? model;
 
   @override
   Widget build(BuildContext context) {
+    if (model == null) {
+      return const Scaffold(
+        body: Column(
+          children: [
+            AppTopBar(),
+            Expanded(child: Center(child: CircularProgressIndicator())),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       body: Column(
         children: [
           const AppTopBar(),
-          Expanded(
-            child: BlocConsumer<ModelDetailCubit, ModelDetailState>(
-              listenWhen: (previous, current) {
-                if (current is! ModelDetailLoaded) return false;
-                if (current.statusMessage == null) return false;
-                if (previous is! ModelDetailLoaded) return true;
-                return previous.statusMessage != current.statusMessage;
-              },
-              listener: (context, state) {
-                if (state is ModelDetailLoaded &&
-                    state.statusMessage != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.statusMessage!)),
-                  );
-                }
-              },
-              builder: (context, state) {
-                if (state is ModelDetailLoading ||
-                    state is ModelDetailInitial) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is ModelDetailFailureState) {
-                  return AppErrorState(
-                    message: state.message,
-                    onRetry: () =>
-                        context.read<ModelDetailCubit>().load(modelId),
-                  );
-                }
-                if (state is! ModelDetailLoaded) {
-                  return const SizedBox.shrink();
-                }
-                return _ModelDetailBody(state: state);
-              },
-            ),
-          ),
+          Expanded(child: _ModelDetailBody(model: model!)),
         ],
       ),
     );
@@ -68,14 +46,12 @@ class ModelDetailView extends StatelessWidget {
 }
 
 class _ModelDetailBody extends StatelessWidget {
-  const _ModelDetailBody({required this.state});
+  const _ModelDetailBody({required this.model});
 
-  final ModelDetailLoaded state;
+  final Model3dEntity model;
 
   @override
   Widget build(BuildContext context) {
-    final model = state.model;
-    final similar = state.similar;
     final isWide = MediaQuery.sizeOf(context).width >= 960;
 
     return SingleChildScrollView(
@@ -95,27 +71,79 @@ class _ModelDetailBody extends StatelessWidget {
             label: const Text('Back'),
           ),
           const SizedBox(height: 8),
+
+          // ── Preview + Info ───────────────────────────────────────────────
           if (isWide)
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(flex: 3, child: _PreviewPanel(model: model)),
                 const SizedBox(width: 24),
-                Expanded(
-                  flex: 2,
-                  child: _InfoCard(state: state),
-                ),
+                Expanded(flex: 2, child: _InfoCard(model: model)),
               ],
             )
           else ...[
             _PreviewPanel(model: model),
             const SizedBox(height: 16),
-            _InfoCard(state: state),
+            _InfoCard(model: model),
           ],
+
+          // ── Description ─────────────────────────────────────────────────
           const SizedBox(height: 32),
           Text('Description', style: AppTextStyles.headlineSm),
           const SizedBox(height: 8),
-          Text(model.description, style: AppTextStyles.bodyLg),
+          if (model.description != null && model.description!.isNotEmpty)
+            Text(model.description!, style: AppTextStyles.bodyLg)
+          else
+            _PlaceholderField(label: 'Description'),
+
+          // ── AI Predictions ───────────────────────────────────────────────
+          if (model.predictions != null || model.aiLabel != null) ...[
+            const SizedBox(height: 28),
+            Text('AI Predictions', style: AppTextStyles.headlineSm),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                if (model.aiLabel != null)
+                  _SpecChip(label: 'AI Label', value: model.aiLabel!),
+                if (model.predictions?.superCategory != null)
+                  _SpecChip(
+                    label: 'Super Category',
+                    value: model.predictions!.superCategory!.label,
+                  ),
+                if (model.predictions?.objectCategory != null)
+                  _SpecChip(
+                    label: 'Object Category',
+                    value: model.predictions!.objectCategory!.label,
+                  ),
+                if (model.predictions?.styleClass != null &&
+                    model.predictions!.styleClass.isNotEmpty)
+                  _SpecChip(
+                    label: 'Style Class',
+                    value: model.predictions!.styleClass
+                        .map((e) => e.label)
+                        .join(', '),
+                  ),
+                if (model.predictions?.materialsPrimary != null)
+                  _SpecChip(
+                    label: 'Primary Material',
+                    value: model.predictions!.materialsPrimary!.label,
+                  ),
+                if (model.predictions?.materialsSecondary != null &&
+                    model.predictions!.materialsSecondary.isNotEmpty)
+                  _SpecChip(
+                    label: 'Secondary Materials',
+                    value: model.predictions!.materialsSecondary
+                        .map((e) => e.label)
+                        .join(', '),
+                  ),
+              ],
+            ),
+          ],
+
+          // ── Specifications ───────────────────────────────────────────────
           const SizedBox(height: 28),
           Text('Specifications', style: AppTextStyles.headlineSm),
           const SizedBox(height: 12),
@@ -123,58 +151,100 @@ class _ModelDetailBody extends StatelessWidget {
             spacing: 12,
             runSpacing: 12,
             children: [
-              _SpecChip(label: 'Category', value: model.label),
-              _SpecChip(label: 'Format', value: model.fileFormat),
+              if (model.category != null)
+                _SpecChip(label: 'Category', value: model.category!),
+              if (model.vertices != null)
+                _SpecChip(
+                  label: 'Vertices',
+                  value: _formatCount(model.vertices!),
+                ),
+              if (model.faces != null)
+                _SpecChip(label: 'Faces', value: _formatCount(model.faces!)),
+              if (model.tags.isNotEmpty)
+                _SpecChip(label: 'Tags', value: model.tags.join(', ')),
               _SpecChip(
-                label: 'Polygons',
-                value: model.polygonCount.toString(),
+                label: 'Uploaded',
+                value: _formatDate(model.uploadedAt),
               ),
-              _SpecChip(label: 'Author', value: model.author),
             ],
           ),
+
+          // ── Similar models placeholder ───────────────────────────────────
           const SizedBox(height: 32),
           Text('Similar models', style: AppTextStyles.headlineSm),
           const SizedBox(height: 16),
-          if (similar.isEmpty)
-            const AppEmptyState(
-              icon: Icons.auto_awesome_outlined,
-              title: 'No similar models',
-              message: 'Related models will show here when available.',
-            )
-          else
-            SizedBox(
-              height: 260,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: similar.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 16),
-                itemBuilder: (context, index) {
-                  final item = similar[index];
-                  return SizedBox(
-                    width: 240,
-                    child: AssetCard(
-                      title: item.title,
-                      subtitle: item.label,
-                      rating: item.rating,
-                      image: item.image,
-                      onTap: () => context.go(
-                        AppRoutes.modelDetailPath(item.id),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+          const AppEmptyState(
+            icon: Icons.auto_awesome_outlined,
+            title: 'Similar models coming soon',
+            message:
+                'Related models will show here once the detail API is integrated.',
+          ),
         ],
       ),
     );
   }
+
+  String _formatCount(int n) {
+    if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
+    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
+    return n.toString();
+  }
+
+  String _formatDate(DateTime dt) =>
+      '${dt.day.toString().padLeft(2, '0')}/'
+      '${dt.month.toString().padLeft(2, '0')}/'
+      '${dt.year}';
 }
 
-class _PreviewPanel extends StatelessWidget {
+// ────────────────────────────────────────────────────────────────────────────
+// Preview panel — 3D model viewer (falls back to banner image on error)
+// ────────────────────────────────────────────────────────────────────────────
+class _PreviewPanel extends StatefulWidget {
   const _PreviewPanel({required this.model});
 
-  final ModelDetailEntity model;
+  final Model3dEntity model;
+
+  @override
+  State<_PreviewPanel> createState() => _PreviewPanelState();
+}
+
+class _PreviewPanelState extends State<_PreviewPanel> {
+  // TODO: replace with the real network URL for the model's GLB/GLTF file
+  // once the detail API exposes it (e.g. widget.model.modelUrl).
+  static String _modelUrl(Model3dEntity model) =>
+      'http://127.0.0.1:8000/media/${model.id}/${model.modelUrl}';
+
+  late final Flutter3DController _controller;
+
+  bool _isRotating = false;
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = Flutter3DController();
+    if (_modelUrl(widget.model).isEmpty) {
+      _isLoading = false;
+      _hasError = true;
+    }
+  }
+
+  void _toggleRotation() {
+    setState(() => _isRotating = !_isRotating);
+    if (_isRotating) {
+      _controller.startRotation(rotationSpeed: 20);
+    } else {
+      _controller.pauseRotation();
+    }
+  }
+
+  void _resetView() {
+    _controller.resetCameraOrbit();
+    _controller.resetCameraTarget();
+    _controller.stopRotation();
+    setState(() => _isRotating = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -190,22 +260,57 @@ class _PreviewPanel extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
+          // Banner image sits underneath as a fallback / while loading.
           PreviewImage(
-            image: model.image,
+            image: widget.model.bannerUrl ?? '',
             borderRadius: BorderRadius.circular(12),
           ),
+          if (!_hasError)
+            Flutter3DViewer(
+              activeGestureInterceptor: true,
+              enableTouch: true,
+              progressBarColor: AppColors.brandAccentPrimary,
+              controller: _controller,
+              src: _modelUrl(widget.model),
+              onProgress: (_) {
+                if (!_isLoading) setState(() => _isLoading = true);
+              },
+              onLoad: (_) => setState(() {
+                _isLoading = false;
+                _hasError = false;
+              }),
+              onError: (_) => setState(() {
+                _isLoading = false;
+                _hasError = true;
+              }),
+            ),
+          if (_isLoading)
+            const Positioned.fill(
+              child: ColoredBox(
+                color: Colors.black26,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ),
+          if (!_hasError)
+            Positioned(
+              top: 12,
+              right: 12,
+              child: _ViewerControls(
+                isRotating: _isRotating,
+                onToggleRotation: _toggleRotation,
+                onReset: _resetView,
+              ),
+            ),
           Positioned(
             left: 16,
             right: 16,
             bottom: 16,
             child: Text(
-              model.title,
+              widget.model.title ?? 'Untitled',
               style: AppTextStyles.bodyMd.copyWith(
                 color: AppColors.textWhite,
                 fontWeight: FontWeight.w600,
-                shadows: const [
-                  Shadow(blurRadius: 8, color: Colors.black54),
-                ],
+                shadows: const [Shadow(blurRadius: 8, color: Colors.black54)],
               ),
             ),
           ),
@@ -215,15 +320,56 @@ class _PreviewPanel extends StatelessWidget {
   }
 }
 
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.state});
+class _ViewerControls extends StatelessWidget {
+  const _ViewerControls({
+    required this.isRotating,
+    required this.onToggleRotation,
+    required this.onReset,
+  });
 
-  final ModelDetailLoaded state;
+  final bool isRotating;
+  final VoidCallback onToggleRotation;
+  final VoidCallback onReset;
 
   @override
   Widget build(BuildContext context) {
-    final model = state.model;
-    final cubit = context.read<ModelDetailCubit>();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            tooltip: isRotating ? 'Pause rotation' : 'Auto-rotate',
+            onPressed: onToggleRotation,
+            icon: Icon(
+              isRotating ? Icons.pause_circle_outline : Icons.threesixty,
+              color: AppColors.textWhite,
+            ),
+          ),
+          IconButton(
+            tooltip: 'Reset view',
+            onPressed: onReset,
+            icon: const Icon(Icons.refresh, color: AppColors.textWhite),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Info card
+// ────────────────────────────────────────────────────────────────────────────
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({required this.model});
+
+  final Model3dEntity model;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -236,12 +382,18 @@ class _InfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(model.title, style: AppTextStyles.headlineSm),
+          // Title
+          Text(model.title ?? 'Untitled', style: AppTextStyles.headlineSm),
           const SizedBox(height: 8),
           Text(
-            '${model.label} · ${model.fileFormat}',
+            [
+              if (model.category != null) model.category!,
+              if (model.aiLabel != null) model.aiLabel!,
+            ].join(' · '),
             style: AppTextStyles.bodyMd,
           ),
+
+          // Stats row
           const SizedBox(height: 16),
           Row(
             children: [
@@ -251,44 +403,68 @@ class _InfoCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                model.rating.toStringAsFixed(1),
+                model.ratingScore.toString(),
                 style: AppTextStyles.bodyMd.copyWith(
                   color: AppColors.textWhite,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(width: 16),
+              const Icon(Icons.download_outlined, size: 18),
+              const SizedBox(width: 4),
               Text(
-                '${model.downloadCount} downloads',
+                '${model.downloadsCount} downloads',
                 style: AppTextStyles.bodyMd,
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text('by @${model.author}', style: AppTextStyles.labelMd),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(Icons.remove_red_eye_outlined, size: 18),
+              const SizedBox(width: 4),
+              Text('${model.viewsCount} views', style: AppTextStyles.bodyMd),
+              const SizedBox(width: 16),
+              const Icon(Icons.hub_outlined, size: 18),
+              const SizedBox(width: 4),
+              Text('${model.usageCount} uses', style: AppTextStyles.bodyMd),
+            ],
+          ),
+
+          // AI confidence
+          if (model.aiConfidence != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'AI confidence: ${(model.aiConfidence! * 100).toStringAsFixed(1)}%',
+              style: AppTextStyles.labelMd.copyWith(
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+          ],
+
+          // Rating — TODO: requires cubit
           const SizedBox(height: 20),
           Text('Your rating', style: AppTextStyles.labelMd),
           const SizedBox(height: 8),
           Row(
             children: [
               for (var i = 1; i <= 5; i++)
-                IconButton(
-                  onPressed: state.isRating ? null : () => cubit.rate(i),
-                  icon: Icon(
-                    (state.userRating ?? 0) >= i
-                        ? Icons.star_rounded
-                        : Icons.star_outline_rounded,
-                    color: AppColors.tertiaryContainer,
-                  ),
-                ),
-              if (state.isRating)
-                const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                Icon(
+                  Icons.star_outline_rounded,
+                  color: AppColors.tertiaryContainer,
                 ),
             ],
           ),
+          const SizedBox(height: 4),
+          Text(
+            'TODO: Rating interaction requires detail API integration',
+            style: AppTextStyles.labelMd.copyWith(
+              color: AppColors.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+
+          // Download button
           const SizedBox(height: 16),
           Builder(
             builder: (context) {
@@ -297,13 +473,25 @@ class _InfoCard extends StatelessWidget {
                       is VisitorSessionGuest;
               return PrimaryButton(
                 label: 'Download model',
-                isLoading: state.isDownloading,
+                isLoading: false,
                 onPressed: isGuest
                     ? () => showAuthGateDialog(
-                          context,
-                          action: 'download this model',
-                        )
-                    : cubit.download,
+                        context,
+                        action: 'download this model',
+                      )
+                    : () {
+                        Dio().download(
+                          'http://127.0.0.1:8000/media/${model.id}/${model.modelUrl}',
+                          'storage/emulated/0/Download/${model.title}.glb',
+                        );
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   const SnackBar(
+                        //     content: Text(
+                        //       'TODO: Download will be available once the detail API is integrated.',
+                        //     ),
+                        //   ),
+                        // );
+                      },
               );
             },
           ),
@@ -313,6 +501,9 @@ class _InfoCard extends StatelessWidget {
   }
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Spec chip
+// ────────────────────────────────────────────────────────────────────────────
 class _SpecChip extends StatelessWidget {
   const _SpecChip({required this.label, required this.value});
 
@@ -348,6 +539,37 @@ class _SpecChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Placeholder field for optional empty data
+// ────────────────────────────────────────────────────────────────────────────
+class _PlaceholderField extends StatelessWidget {
+  const _PlaceholderField({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.brandSecondarySurface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppColors.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Text(
+        'TODO: $label — will be populated from the API',
+        style: AppTextStyles.bodyMd.copyWith(
+          color: AppColors.onSurfaceVariant,
+          fontStyle: FontStyle.italic,
+        ),
       ),
     );
   }

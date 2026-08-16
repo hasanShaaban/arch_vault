@@ -18,8 +18,7 @@ import '../../features/collections/presentation/manager/collection_detail_cubit/
 import '../../features/collections/presentation/views/collection_detail_view.dart';
 import '../../features/collections/presentation/views/collections_view.dart';
 import '../../features/home/presentation/views/home_view.dart';
-import '../../features/model_detail/domain/repo/model_detail_repo.dart';
-import '../../features/model_detail/presentation/manager/model_detail_cubit/model_detail_cubit.dart';
+import '../../features/home/domain/entities/model_3d_entity.dart';
 import '../../features/model_detail/presentation/views/model_detail_view.dart';
 import '../../features/profile/presentation/views/profile_view.dart';
 import '../../features/upload/domain/repo/upload_repo.dart';
@@ -116,11 +115,10 @@ class AppRouter {
           path: AppRoutes.modelDetail,
           builder: (context, state) {
             final id = state.pathParameters['id'] ?? '';
-            return BlocProvider(
-              create: (context) =>
-                  ModelDetailCubit(context.read<ModelDetailRepo>())..load(id),
-              child: ModelDetailView(modelId: id),
-            );
+            final model = state.extra is Model3dEntity
+                ? state.extra as Model3dEntity
+                : null;
+            return ModelDetailView(modelId: id, model: model);
           },
         ),
       ],

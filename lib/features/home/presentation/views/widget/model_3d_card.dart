@@ -41,17 +41,21 @@ class Model3dCard extends StatelessWidget {
           children: [
             // ── Thumbnail / placeholder ──────────────────────────────────
             Expanded(
-              child: _ThumbnailPlaceholder(title: 'TODO:ModleName'),
-            ), //TODO:Model name
+              child: _ThumbnailPlaceholder(
+                title: model.title ?? 'Untitled Model',
+                bannerUrl: model.bannerUrl!,
+                id: model.id,
+              ),
+            ),
             // ── Info row ─────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title (derived from filename)
+                  // Title
                   Text(
-                    "TODO:ModelName",
+                    model.title ?? 'Untitled Model',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.bodyMd.copyWith(
@@ -127,9 +131,15 @@ class Model3dCard extends StatelessWidget {
 // ── Placeholder widget ────────────────────────────────────────────────────────
 
 class _ThumbnailPlaceholder extends StatelessWidget {
-  const _ThumbnailPlaceholder({required this.title});
+  const _ThumbnailPlaceholder({
+    required this.title,
+    required this.bannerUrl,
+    required this.id,
+  });
 
   final String title;
+  final String bannerUrl;
+  final String id;
 
   @override
   Widget build(BuildContext context) {
@@ -147,49 +157,54 @@ class _ThumbnailPlaceholder extends StatelessWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.view_in_ar_outlined,
-                  size: 36,
-                  color: AppColors.brandAccentPrimary.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: 6),
                 // TODO(thumbnail): replace with actual model preview image
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.brandAccentPrimary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
                       color: AppColors.brandAccentPrimary.withValues(
-                        alpha: 0.3,
+                        alpha: 0.12,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: AppColors.brandAccentPrimary.withValues(
+                          alpha: 0.3,
+                        ),
+                      ),
+                      image: DecorationImage(
+                        image: NetworkImage(
+                          'http://127.0.0.1:8000/media/$id/$bannerUrl',
+                        ),
+                        fit: BoxFit.contain,
                       ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.construction_rounded,
-                        size: 11,
-                        color: AppColors.brandAccentPrimary.withValues(
-                          alpha: 0.7,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Preview TODO',
-                        style: AppTextStyles.labelMd.copyWith(
-                          fontSize: 10,
-                          color: AppColors.brandAccentPrimary.withValues(
-                            alpha: 0.7,
-                          ),
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ],
+
+                    // Row(
+                    //   mainAxisSize: MainAxisSize.min,
+                    //   children: [
+                    //     Icon(
+                    //       Icons.construction_rounded,
+                    //       size: 11,
+                    //       color: AppColors.brandAccentPrimary.withValues(
+                    //         alpha: 0.7,
+                    //       ),
+                    //     ),
+                    //     const SizedBox(width: 4),
+                    //     Text(
+                    //       'Preview TODO',
+                    //       style: AppTextStyles.labelMd.copyWith(
+                    //         fontSize: 10,
+                    //         color: AppColors.brandAccentPrimary.withValues(
+                    //           alpha: 0.7,
+                    //         ),
+                    //         letterSpacing: 0.4,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ),
                 ),
               ],

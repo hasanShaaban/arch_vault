@@ -221,6 +221,7 @@ class _HomeViewBodyState extends State<_HomeViewBody> {
                                                   AppRoutes.modelDetailPath(
                                                     models[index].id,
                                                   ),
+                                                  extra: models[index],
                                                 ),
                                               );
                                             },

@@ -139,6 +139,7 @@ class _BrowseViewState extends State<BrowseView> {
                                           image: model.image,
                                           onTap: () => context.go(
                                             AppRoutes.modelDetailPath(model.id),
+                                            extra: model,
                                           ),
                                         );
                                       },
