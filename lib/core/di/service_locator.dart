@@ -1,3 +1,5 @@
+import 'package:arch_vault/features/home/data/data_sources/home_remote_data_source.dart';
+import 'package:arch_vault/features/home/domain/data_source/home_remote_data_sorce.dart';
 import 'package:get_it/get_it.dart';
 
 import '../network/api_service.dart';
@@ -25,6 +27,7 @@ import '../../features/auth/presentation/manager/signup_cubit/signup_cubit.dart'
 import '../../features/home/data/data_sources/home_local_data_source.dart';
 import '../../features/home/data/repo/home_repo_impl.dart';
 import '../../features/home/domain/repo/home_repo.dart';
+import '../../features/home/presentation/manager/get_models_cubit/get_models_cubit.dart';
 import '../../features/home/presentation/manager/home_cubit/home_cubit.dart';
 
 // --- Browse ---
@@ -53,6 +56,12 @@ import '../../features/profile/presentation/manager/profile_cubit/profile_cubit.
 // --- Upload ---
 import '../../features/upload/data/repo/upload_repo_impl.dart';
 import '../../features/upload/domain/repo/upload_repo.dart';
+
+// --- Admin ---
+import '../../features/admin/data/datasources/admin_local_datasource.dart';
+import '../../features/admin/data/repositories/admin_repo_impl.dart';
+import '../../features/admin/domain/repositories/admin_repo.dart';
+import '../../features/admin/presentation/cubit/admin_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -102,12 +111,15 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<HomeLocalDataSource>(
     () => HomeLocalDataSourceImpl(),
   );
-
+  sl.registerLazySingleton<HomeRemoteDataSource>(
+    () => HomeRemoteDataSourceImpl(sl<ApiService>()),
+  );
   sl.registerLazySingleton<HomeRepo>(
-    () => HomeRepoImpl(sl<HomeLocalDataSource>()),
+    () => HomeRepoImpl(sl<HomeLocalDataSource>(), sl<HomeRemoteDataSource>()),
   );
 
   sl.registerFactory<HomeCubit>(() => HomeCubit(sl<HomeRepo>()));
+  sl.registerFactory<GetModelsCubit>(() => GetModelsCubit(sl<HomeRepo>()));
 
   // ─── Browse ───────────────────────────────────────────────────────────────
   sl.registerLazySingleton<BrowseLocalDataSource>(
@@ -161,4 +173,15 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<UploadRepo>(
     () => UploadRepoImpl(sl<UploadLocalDataSource>()),
   );
+
+  // ─── Admin ────────────────────────────────────────────────────────────────
+  sl.registerLazySingleton<AdminLocalDataSource>(
+    () => AdminLocalDataSourceImpl(),
+  );
+
+  sl.registerLazySingleton<AdminRepo>(
+    () => AdminRepoImpl(sl<AdminLocalDataSource>()),
+  );
+
+  sl.registerFactory<AdminCubit>(() => AdminCubit(sl<AdminRepo>()));
 }

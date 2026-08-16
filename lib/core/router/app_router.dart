@@ -10,6 +10,7 @@ import '../../features/auth/domain/repo/auth_repo.dart';
 import '../../features/auth/presentation/manager/forgot_password_cubit/forgot_password_cubit.dart';
 import '../../features/auth/presentation/views/forgot_password_view.dart';
 import '../../features/auth/presentation/views/login_view.dart';
+import '../../features/auth/presentation/views/role_selection_view.dart';
 import '../../features/auth/presentation/views/signup_view.dart';
 import '../../features/browse/presentation/views/browse_view.dart';
 import '../../features/collections/domain/repo/collections_repo.dart';
@@ -32,11 +33,18 @@ class AppRouter {
 
   static GoRouter create() {
     return GoRouter(
-      initialLocation: AppRoutes.signIn,
+      initialLocation: AppRoutes.roleSelection,
       routes: [
         GoRoute(
+          path: AppRoutes.roleSelection,
+          builder: (context, state) => const RoleSelectionView(),
+        ),
+        GoRoute(
           path: AppRoutes.signIn,
-          builder: (context, state) => const LoginView(),
+          builder: (context, state) {
+            final role = (state.extra is String) ? state.extra as String : 'user';
+            return LoginView(role: role);
+          },
         ),
         GoRoute(
           path: AppRoutes.signUp,

@@ -174,7 +174,10 @@ class _SignUpViewState extends State<SignUpView> {
                                 style: AppTextStyles.bodyMd,
                               ),
                               TextButton(
-                                onPressed: () => context.go(AppRoutes.signIn),
+                                onPressed: () => context.go(
+                                  AppRoutes.signIn,
+                                  extra: 'user',
+                                ),
                                 child: const Text('Sign in'),
                               ),
                             ],

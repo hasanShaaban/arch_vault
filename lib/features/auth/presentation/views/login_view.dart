@@ -13,7 +13,10 @@ import '../../../../core/widgets/app_widgets.dart';
 import 'widget/auth_form_fields.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+  const LoginView({super.key, this.role = 'user'});
+
+  /// The role chosen on the role-selection screen: 'admin' or 'user'.
+  final String role;
 
   @override
   State<LoginView> createState() => _LoginViewState();
@@ -43,6 +46,8 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  String get _role => widget.role;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +71,11 @@ class _LoginViewState extends State<LoginView> {
                 listener: (context, state) {
                   if (state is LoginSuccess) {
                     log('Logged in successfully with ${state.token}');
-                    context.go(AppRoutes.home);
+                    if (_role == 'admin') {
+                      context.go(AppRoutes.admin);
+                    } else {
+                      context.go(AppRoutes.home);
+                    }
                   } else if (state is LoginFailureState) {
                     ScaffoldMessenger.of(
                       context,
@@ -98,14 +107,15 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Welcome back',
+                            _role == 'admin' ? 'Admin Sign In' : 'Welcome back',
                             textAlign: TextAlign.center,
                             style: AppTextStyles.headlineSm,
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Sign in to continue to your vault',
-                            textAlign: TextAlign.center,
+                            _role == 'admin'
+                                ? 'Sign in to access the admin dashboard'
+                                : 'Sign in to continue to your vault',
                             style: AppTextStyles.bodyMd,
                           ),
                           const SizedBox(height: 24),
@@ -126,8 +136,10 @@ class _LoginViewState extends State<LoginView> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () =>
-                                  context.go(AppRoutes.forgotPassword),
+                              onPressed: () => context.go(
+                                AppRoutes.forgotPassword,
+                                extra: _role,
+                              ),
                               child: const Text('Forgot password?'),
                             ),
                           ),
@@ -137,21 +149,23 @@ class _LoginViewState extends State<LoginView> {
                             isLoading: loading,
                             onPressed: _submit,
                           ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              Text(
-                                "Don't have an account?",
-                                style: AppTextStyles.bodyMd,
-                              ),
-                              TextButton(
-                                onPressed: () => context.go(AppRoutes.signUp),
-                                child: const Text('Create account'),
-                              ),
-                            ],
-                          ),
+                          if (_role != 'admin') ...[
+                            const SizedBox(height: 12),
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(
+                                  "Don't have an account?",
+                                  style: AppTextStyles.bodyMd,
+                                ),
+                                TextButton(
+                                  onPressed: () => context.go(AppRoutes.signUp),
+                                  child: const Text('Create account'),
+                                ),
+                              ],
+                            ),
+                          ],
                           const SizedBox(height: 8),
                           Text(
                             'Admin: demo@archvault.com / password123\n'

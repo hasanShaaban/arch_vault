@@ -16,6 +16,8 @@ import 'features/home/presentation/manager/home_cubit/home_cubit.dart';
 import 'features/profile/domain/repo/profile_repo.dart';
 import 'features/profile/presentation/manager/profile_cubit/profile_cubit.dart';
 import 'features/upload/domain/repo/upload_repo.dart';
+import 'features/admin/domain/repositories/admin_repo.dart';
+import 'features/admin/presentation/cubit/admin_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +55,7 @@ class _ArchVaultAppState extends State<ArchVaultApp> {
         RepositoryProvider<CollectionsRepo>.value(value: sl<CollectionsRepo>()),
         RepositoryProvider<ProfileRepo>.value(value: sl<ProfileRepo>()),
         RepositoryProvider<UploadRepo>.value(value: sl<UploadRepo>()),
+        RepositoryProvider<AdminRepo>.value(value: sl<AdminRepo>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -62,6 +65,7 @@ class _ArchVaultAppState extends State<ArchVaultApp> {
           BlocProvider<BrowseCubit>(create: (_) => sl<BrowseCubit>()),
           BlocProvider<CollectionsCubit>(create: (_) => sl<CollectionsCubit>()),
           BlocProvider<ProfileCubit>(create: (_) => sl<ProfileCubit>()),
+          BlocProvider<AdminCubit>(create: (_) => sl<AdminCubit>()),
         ],
         child: MaterialApp.router(
           title: 'ArchVault',

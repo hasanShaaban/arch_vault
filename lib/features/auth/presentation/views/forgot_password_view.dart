@@ -8,7 +8,10 @@ import '../../../../core/widgets/app_widgets.dart';
 import 'widget/auth_form_fields.dart';
 
 class ForgotPasswordView extends StatefulWidget {
-  const ForgotPasswordView({super.key});
+  const ForgotPasswordView({super.key, this.role = 'user'});
+
+  /// The role forwarded from [LoginView] so back-navigation stays coherent.
+  final String role;
 
   @override
   State<ForgotPasswordView> createState() => _ForgotPasswordViewState();
@@ -96,7 +99,10 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                       PrimaryButton(label: 'Send reset link', onPressed: () {}),
                       const SizedBox(height: 12),
                       TextButton(
-                        onPressed: () => context.go(AppRoutes.signIn),
+                        onPressed: () => context.go(
+                          AppRoutes.signIn,
+                          extra: widget.role,
+                        ),
                         child: const Text('Back to Sign In'),
                       ),
                     ],

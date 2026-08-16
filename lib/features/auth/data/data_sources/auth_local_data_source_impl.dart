@@ -2,11 +2,9 @@ import 'package:arch_vault/core/storage/local_storage.dart';
 import 'package:arch_vault/core/storage/storage_keys.dart';
 import 'package:arch_vault/features/auth/domain/data_source.dart/auth_local_data_source.dart';
 
-/// [AuthLocalDataSource] implementation that delegates persistence to the
-/// injected [LocalStorage] instance (Hive in production).
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   const AuthLocalDataSourceImpl({required LocalStorage storage})
-      : _storage = storage;
+    : _storage = storage;
 
   final LocalStorage _storage;
 
