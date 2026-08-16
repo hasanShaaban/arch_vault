@@ -15,6 +15,7 @@ class UploadDraftEntity {
     this.fileName,
     this.title = '',
     this.description = '',
+    this.bannerImageName,
     this.tags = const [],
     this.aiLabels = const [],
   });
@@ -22,6 +23,7 @@ class UploadDraftEntity {
   final String? fileName;
   final String title;
   final String description;
+  final String? bannerImageName;
   final List<String> tags;
   final List<AiLabelScore> aiLabels;
 
@@ -29,6 +31,7 @@ class UploadDraftEntity {
     String? fileName,
     String? title,
     String? description,
+    String? bannerImageName,
     List<String>? tags,
     List<AiLabelScore>? aiLabels,
   }) {
@@ -36,6 +39,7 @@ class UploadDraftEntity {
       fileName: fileName ?? this.fileName,
       title: title ?? this.title,
       description: description ?? this.description,
+      bannerImageName: bannerImageName ?? this.bannerImageName,
       tags: tags ?? this.tags,
       aiLabels: aiLabels ?? this.aiLabels,
     );

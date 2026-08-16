@@ -21,13 +21,11 @@ class UploadView extends StatefulWidget {
 class _UploadViewState extends State<UploadView> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _tagsController = TextEditingController();
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _tagsController.dispose();
     super.dispose();
   }
 
@@ -80,7 +78,6 @@ class _UploadViewState extends State<UploadView> {
                             form: form,
                             titleController: _titleController,
                             descriptionController: _descriptionController,
-                            tagsController: _tagsController,
                           ),
                         if (form.step == UploadStep.aiReview)
                           _AiReviewStep(form: form),
@@ -213,17 +210,16 @@ class _DetailsStep extends StatelessWidget {
     required this.form,
     required this.titleController,
     required this.descriptionController,
-    required this.tagsController,
   });
 
   final UploadFormState form;
   final TextEditingController titleController;
   final TextEditingController descriptionController;
-  final TextEditingController tagsController;
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<UploadCubit>();
+    final bannerName = form.draft.bannerImageName;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -239,9 +235,47 @@ class _DetailsStep extends StatelessWidget {
           hintText: 'Description',
         ),
         const SizedBox(height: 12),
-        AppTextField(
-          controller: tagsController,
-          hintText: 'Tags (comma separated)',
+        InkWell(
+          onTap: form.isBusy ? null : cubit.pickBannerImage,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.outlineVariant.withValues(alpha: 0.5),
+              ),
+              color: AppColors.brandSecondarySurface,
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.image_outlined,
+                  color: AppColors.brandAccentPrimary,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    bannerName ?? 'Upload banner image (PNG, JPG, WebP)',
+                    style: AppTextStyles.bodyMd.copyWith(
+                      color: bannerName != null
+                          ? AppColors.textWhite
+                          : AppColors.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  bannerName != null ? 'Change' : 'Browse',
+                  style: AppTextStyles.labelMd.copyWith(
+                    color: AppColors.brandAccentPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: 20),
         Row(
@@ -260,7 +294,6 @@ class _DetailsStep extends StatelessWidget {
                 onPressed: () => cubit.runAiReview(
                   title: titleController.text,
                   description: descriptionController.text,
-                  tagsCsv: tagsController.text,
                 ),
               ),
             ),

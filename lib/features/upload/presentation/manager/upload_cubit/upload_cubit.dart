@@ -7,22 +7,16 @@ import 'upload_state.dart';
 
 class UploadCubit extends Cubit<UploadState> {
   UploadCubit(this._repo)
-      : super(
-          const UploadFormState(
-            step: UploadStep.file,
-            draft: UploadDraftEntity(),
-          ),
-        );
+    : super(
+        const UploadFormState(
+          step: UploadStep.file,
+          draft: UploadDraftEntity(),
+        ),
+      );
 
   final UploadRepo _repo;
 
-  static const _allowedExtensions = [
-    'gltf',
-    'glb',
-    'obj',
-    'fbx',
-    'blend',
-  ];
+  static const _allowedExtensions = ['gltf', 'glb'];
 
   UploadFormState get _form => state as UploadFormState;
 
@@ -48,31 +42,44 @@ class UploadCubit extends Cubit<UploadState> {
       );
     } catch (e) {
       emit(
+        _form.copyWith(isBusy: false, errorMessage: 'Could not pick file: $e'),
+      );
+    }
+  }
+
+  Future<void> pickBannerImage() async {
+    emit(_form.copyWith(isBusy: true, clearError: true));
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.image,
+        withData: false,
+      );
+      if (result == null || result.files.isEmpty) {
+        emit(_form.copyWith(isBusy: false));
+        return;
+      }
+      final file = result.files.first;
+      emit(
         _form.copyWith(
           isBusy: false,
-          errorMessage: 'Could not pick file: $e',
+          draft: _form.draft.copyWith(bannerImageName: file.name),
+          clearError: true,
+        ),
+      );
+    } catch (e) {
+      emit(
+        _form.copyWith(
+          isBusy: false,
+          errorMessage: 'Could not pick banner image: $e',
         ),
       );
     }
   }
 
-  void updateDetails({
-    required String title,
-    required String description,
-    required String tagsCsv,
-  }) {
-    final tags = tagsCsv
-        .split(',')
-        .map((t) => t.trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
+  void updateDetails({required String title, required String description}) {
     emit(
       _form.copyWith(
-        draft: _form.draft.copyWith(
-          title: title,
-          description: description,
-          tags: tags,
-        ),
+        draft: _form.draft.copyWith(title: title, description: description),
         clearError: true,
       ),
     );
@@ -89,17 +96,12 @@ class UploadCubit extends Cubit<UploadState> {
   Future<void> runAiReview({
     required String title,
     required String description,
-    required String tagsCsv,
   }) async {
     if (title.trim().isEmpty) {
       emit(_form.copyWith(errorMessage: 'Title is required.'));
       return;
     }
-    updateDetails(
-      title: title,
-      description: description,
-      tagsCsv: tagsCsv,
-    );
+    updateDetails(title: title, description: description);
 
     emit(_form.copyWith(isBusy: true, clearError: true));
     try {
@@ -142,10 +144,7 @@ class UploadCubit extends Cubit<UploadState> {
 
   void reset() {
     emit(
-      const UploadFormState(
-        step: UploadStep.file,
-        draft: UploadDraftEntity(),
-      ),
+      const UploadFormState(step: UploadStep.file, draft: UploadDraftEntity()),
     );
   }
 }
