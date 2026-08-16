@@ -1,4 +1,8 @@
+import 'dart:html' as html;
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -40,14 +44,16 @@ class _UploadViewState extends State<UploadView> {
               listener: (context, state) {
                 if (state is! UploadFormState) return;
                 if (state.errorMessage != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.errorMessage!)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
                 }
                 if (state.submitted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Upload submitted (mock). Opening My Uploads…'),
+                      content: Text(
+                        'Upload submitted (mock). Opening My Uploads…',
+                      ),
                     ),
                   );
                   context.read<UploadCubit>().reset();
@@ -149,6 +155,13 @@ class _FileStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<UploadCubit>();
+    // NOTE: assumes `UploadDraftEntity` exposes the picked file's raw bytes
+    // (needed on Flutter Web, where there is no real filesystem path).
+    // Add a `Uint8List? fileBytes` field to the entity/cubit if it isn't
+    // there yet, and populate it in `pickModelFile()`.
+    final Uint8List? fileBytes = form.draft.fileBytes;
+    final hasModel = fileBytes != null && form.draft.fileName != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -156,7 +169,7 @@ class _FileStep extends StatelessWidget {
           onTap: form.isBusy ? null : cubit.pickModelFile,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            height: 180,
+            height: hasModel ? 90 : 180,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
@@ -171,9 +184,11 @@ class _FileStep extends StatelessWidget {
                 if (form.isBusy && form.step == UploadStep.file)
                   const CircularProgressIndicator()
                 else
-                  const Icon(
-                    Icons.upload_file_outlined,
-                    size: 42,
+                  Icon(
+                    hasModel
+                        ? Icons.check_circle_outline
+                        : Icons.upload_file_outlined,
+                    size: hasModel ? 28 : 42,
                     color: AppColors.brandAccentPrimary,
                   ),
                 const SizedBox(height: 12),
@@ -183,22 +198,192 @@ class _FileStep extends StatelessWidget {
                     color: AppColors.textWhite,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Supported: GLTF, GLB, OBJ, FBX, BLEND',
-                  style: AppTextStyles.labelMd.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                if (!hasModel) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Supported: GLTF, GLB, OBJ, FBX, BLEND',
+                    style: AppTextStyles.labelMd.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
         ),
+        if (hasModel) ...[
+          const SizedBox(height: 16),
+          _ModelPreviewCard(
+            key: ValueKey(form.draft.fileName),
+            bytes: fileBytes,
+            fileName: form.draft.fileName!,
+          ),
+        ],
         const SizedBox(height: 20),
         PrimaryButton(
           label: 'Continue',
           isLoading: form.isBusy,
-          onPressed: cubit.goToDetails,
+          onPressed: hasModel ? cubit.goToDetails : null,
+        ),
+      ],
+    );
+  }
+}
+
+/// Simple inline 3D model preview shown right after a GLB/GLTF file is
+/// picked, with basic rotate / zoom / reset controls wired to
+/// [Flutter3DController].
+class _ModelPreviewCard extends StatefulWidget {
+  const _ModelPreviewCard({
+    super.key,
+    required this.bytes,
+    required this.fileName,
+  });
+
+  final Uint8List bytes;
+  final String fileName;
+
+  @override
+  State<_ModelPreviewCard> createState() => _ModelPreviewCardState();
+}
+
+class _ModelPreviewCardState extends State<_ModelPreviewCard> {
+  late final Flutter3DController _controller;
+  late final String _blobUrl;
+
+  bool _isRotating = false;
+  bool _isLoading = true;
+  String? _loadError;
+  double _orbitRadius = 5;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = Flutter3DController();
+    _blobUrl = _createBlobUrl(widget.bytes, widget.fileName);
+  }
+
+  // Web only: turn the picked file's bytes into an object URL so
+  // Flutter3DViewer (which expects an asset path or a URL) can load it.
+  String _createBlobUrl(Uint8List bytes, String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    final mimeType = extension == 'gltf'
+        ? 'model/gltf+json'
+        : 'model/gltf-binary';
+    final blob = html.Blob([bytes], mimeType);
+    return html.Url.createObjectUrlFromBlob(blob);
+  }
+
+  @override
+  void dispose() {
+    html.Url.revokeObjectUrl(_blobUrl);
+    super.dispose();
+  }
+
+  void _toggleRotation() {
+    setState(() => _isRotating = !_isRotating);
+    if (_isRotating) {
+      _controller.startRotation(rotationSpeed: 25);
+    } else {
+      _controller.pauseRotation();
+    }
+  }
+
+  void _zoom(double delta) {
+    _orbitRadius = (_orbitRadius + delta).clamp(1.0, 20.0);
+    _controller.setCameraOrbit(0, 75, _orbitRadius);
+  }
+
+  void _resetView() {
+    _controller.resetCameraOrbit();
+    _controller.resetCameraTarget();
+    setState(() {
+      _isRotating = false;
+      _orbitRadius = 5;
+    });
+    _controller.stopRotation();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            height: 320,
+            color: AppColors.brandSecondarySurface,
+            child: Stack(
+              children: [
+                Flutter3DViewer(
+                  activeGestureInterceptor: true,
+                  enableTouch: true,
+                  progressBarColor: AppColors.brandAccentPrimary,
+                  controller: _controller,
+                  src: _blobUrl,
+                  onProgress: (_) {
+                    if (!_isLoading) setState(() => _isLoading = true);
+                  },
+                  onLoad: (_) => setState(() {
+                    _isLoading = false;
+                    _loadError = null;
+                  }),
+                  onError: (error) => setState(() {
+                    _isLoading = false;
+                    _loadError = error;
+                  }),
+                ),
+                if (_loadError != null)
+                  Positioned.fill(
+                    child: Container(
+                      color: AppColors.brandSecondarySurface,
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'Could not preview this model.\n$_loadError',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.bodyMd,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              tooltip: _isRotating ? 'Pause rotation' : 'Auto-rotate',
+              onPressed: _toggleRotation,
+              icon: Icon(
+                _isRotating ? Icons.pause_circle_outline : Icons.threesixty,
+              ),
+              color: AppColors.brandAccentPrimary,
+            ),
+            IconButton(
+              tooltip: 'Zoom in',
+              onPressed: () => _zoom(-1),
+              icon: const Icon(Icons.zoom_in),
+              color: AppColors.brandAccentPrimary,
+            ),
+            IconButton(
+              tooltip: 'Zoom out',
+              onPressed: () => _zoom(1),
+              icon: const Icon(Icons.zoom_out),
+              color: AppColors.brandAccentPrimary,
+            ),
+            IconButton(
+              tooltip: 'Reset view',
+              onPressed: _resetView,
+              icon: const Icon(Icons.refresh),
+              color: AppColors.brandAccentPrimary,
+            ),
+          ],
         ),
       ],
     );
@@ -223,10 +408,7 @@ class _DetailsStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'File: ${form.draft.fileName}',
-          style: AppTextStyles.labelMd,
-        ),
+        Text('File: ${form.draft.fileName}', style: AppTextStyles.labelMd),
         const SizedBox(height: 16),
         AppTextField(controller: titleController, hintText: 'Model title'),
         const SizedBox(height: 12),
@@ -381,7 +563,9 @@ class _LabelBar extends StatelessWidget {
             Expanded(
               child: Text(
                 item.label,
-                style: AppTextStyles.bodyMd.copyWith(color: AppColors.textWhite),
+                style: AppTextStyles.bodyMd.copyWith(
+                  color: AppColors.textWhite,
+                ),
               ),
             ),
             Text('$pct%', style: AppTextStyles.labelMd),

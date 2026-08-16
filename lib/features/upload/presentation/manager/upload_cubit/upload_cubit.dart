@@ -26,17 +26,32 @@ class UploadCubit extends Cubit<UploadState> {
       final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: _allowedExtensions,
-        withData: false,
+        // Needed on Flutter Web: there's no real filesystem path, only
+        // in-memory bytes, and the 3D preview needs those bytes to build
+        // a blob URL for Flutter3DViewer.
+        withData: true,
       );
       if (result == null || result.files.isEmpty) {
         emit(_form.copyWith(isBusy: false));
         return;
       }
       final file = result.files.first;
+      if (file.bytes == null) {
+        emit(
+          _form.copyWith(
+            isBusy: false,
+            errorMessage: 'Could not read file data.',
+          ),
+        );
+        return;
+      }
       emit(
         _form.copyWith(
           isBusy: false,
-          draft: _form.draft.copyWith(fileName: file.name),
+          draft: _form.draft.copyWith(
+            fileName: file.name,
+            fileBytes: file.bytes,
+          ),
           clearError: true,
         ),
       );

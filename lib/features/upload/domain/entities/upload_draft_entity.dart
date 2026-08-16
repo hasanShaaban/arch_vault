@@ -1,10 +1,9 @@
+import 'dart:typed_data';
+
 enum UploadStep { file, details, aiReview }
 
 class AiLabelScore {
-  const AiLabelScore({
-    required this.label,
-    required this.confidence,
-  });
+  const AiLabelScore({required this.label, required this.confidence});
 
   final String label;
   final double confidence;
@@ -18,6 +17,7 @@ class UploadDraftEntity {
     this.bannerImageName,
     this.tags = const [],
     this.aiLabels = const [],
+    this.fileBytes,
   });
 
   final String? fileName;
@@ -26,6 +26,7 @@ class UploadDraftEntity {
   final String? bannerImageName;
   final List<String> tags;
   final List<AiLabelScore> aiLabels;
+  final Uint8List? fileBytes; // add as a field
 
   UploadDraftEntity copyWith({
     String? fileName,
@@ -34,6 +35,7 @@ class UploadDraftEntity {
     String? bannerImageName,
     List<String>? tags,
     List<AiLabelScore>? aiLabels,
+    Uint8List? fileBytes, // add as a field
   }) {
     return UploadDraftEntity(
       fileName: fileName ?? this.fileName,
@@ -42,6 +44,7 @@ class UploadDraftEntity {
       bannerImageName: bannerImageName ?? this.bannerImageName,
       tags: tags ?? this.tags,
       aiLabels: aiLabels ?? this.aiLabels,
+      fileBytes: fileBytes ?? this.fileBytes,
     );
   }
 }
