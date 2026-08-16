@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:arch_vault/features/auth/presentation/manager/login_cubit/login_cubit.dart';
 import 'package:arch_vault/features/auth/presentation/manager/login_cubit/login_state.dart';
+import 'package:arch_vault/features/auth/presentation/manager/visitor_session_cubit/visitor_session_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -13,10 +14,14 @@ import '../../../../core/widgets/app_widgets.dart';
 import 'widget/auth_form_fields.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView({super.key, this.role = 'user'});
+  const LoginView({super.key, this.role = 'user', this.showSkip = false});
 
   /// The role chosen on the role-selection screen: 'admin' or 'user'.
   final String role;
+
+  /// When true, renders a close button that returns the user to HomeView
+  /// without logging in (visitor mode).
+  final bool showSkip;
 
   @override
   State<LoginView> createState() => _LoginViewState();
@@ -62,127 +67,163 @@ class _LoginViewState extends State<LoginView> {
             ],
           ),
         ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: BlocConsumer<LoginCubit, LoginState>(
-                listener: (context, state) {
-                  if (state is LoginSuccess) {
-                    log('Logged in successfully with ${state.token}');
-                    if (_role == 'admin') {
-                      context.go(AppRoutes.admin);
-                    } else {
-                      context.go(AppRoutes.home);
-                    }
-                  } else if (state is LoginFailureState) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(state.message)));
-                  }
-                },
-                builder: (context, state) {
-                  final loading = state is LoginLoading;
-                  return Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppColors.brandSecondarySurface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'ArchVault',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.headlineSm.copyWith(
-                              color: AppColors.brandAccentPrimary,
-                            ),
+        child: Stack(
+          children: [
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: BlocConsumer<LoginCubit, LoginState>(
+                    listener: (context, state) {
+                      if (state is LoginSuccess) {
+                        log('Logged in successfully with ${state.token}');
+                        // Mark the session as authenticated with the actual role
+                        context.read<VisitorSessionCubit>().setLoggedIn(role: _role);
+                        if (_role == 'admin') {
+                          context.go(AppRoutes.admin);
+                        } else {
+                          context.go(AppRoutes.home);
+                        }
+                      } else if (state is LoginFailureState) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(state.message)));
+                      }
+                    },
+                    builder: (context, state) {
+                      final loading = state is LoginLoading;
+                      return Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandSecondarySurface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color:
+                                AppColors.outlineVariant.withValues(alpha: 0.5),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _role == 'admin' ? 'Admin Sign In' : 'Welcome back',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.headlineSm,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _role == 'admin'
-                                ? 'Sign in to access the admin dashboard'
-                                : 'Sign in to continue to your vault',
-                            style: AppTextStyles.bodyMd,
-                          ),
-                          const SizedBox(height: 24),
-                          EmailTextField(
-                            controller: _emailController,
-                            focusNode: _emailFocus,
-                            textInputAction: TextInputAction.next,
-                            onFieldSubmitted: (_) =>
-                                _passwordFocus.requestFocus(),
-                          ),
-                          const SizedBox(height: 12),
-                          PasswordTextField(
-                            controller: _passwordController,
-                            focusNode: _passwordFocus,
-                            textInputAction: TextInputAction.done,
-                            onFieldSubmitted: (_) => _submit(),
-                          ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () => context.go(
-                                AppRoutes.forgotPassword,
-                                extra: _role,
-                              ),
-                              child: const Text('Forgot password?'),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          PrimaryButton(
-                            label: 'Sign In',
-                            isLoading: loading,
-                            onPressed: _submit,
-                          ),
-                          if (_role != 'admin') ...[
-                            const SizedBox(height: 12),
-                            Wrap(
-                              alignment: WrapAlignment.center,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                Text(
-                                  "Don't have an account?",
-                                  style: AppTextStyles.bodyMd,
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                'ArchVault',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.headlineSm.copyWith(
+                                  color: AppColors.brandAccentPrimary,
                                 ),
-                                TextButton(
-                                  onPressed: () => context.go(AppRoutes.signUp),
-                                  child: const Text('Create account'),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _role == 'admin'
+                                    ? 'Admin Sign In'
+                                    : 'Welcome back',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.headlineSm,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _role == 'admin'
+                                    ? 'Sign in to access the admin dashboard'
+                                    : 'Sign in to continue to your vault',
+                                style: AppTextStyles.bodyMd,
+                              ),
+                              const SizedBox(height: 24),
+                              EmailTextField(
+                                controller: _emailController,
+                                focusNode: _emailFocus,
+                                textInputAction: TextInputAction.next,
+                                onFieldSubmitted: (_) =>
+                                    _passwordFocus.requestFocus(),
+                              ),
+                              const SizedBox(height: 12),
+                              PasswordTextField(
+                                controller: _passwordController,
+                                focusNode: _passwordFocus,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _submit(),
+                              ),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () => context.go(
+                                    AppRoutes.forgotPassword,
+                                    extra: _role,
+                                  ),
+                                  child: const Text('Forgot password?'),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              PrimaryButton(
+                                label: 'Sign In',
+                                isLoading: loading,
+                                onPressed: _submit,
+                              ),
+                              if (_role != 'admin') ...[
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  alignment: WrapAlignment.center,
+                                  crossAxisAlignment:
+                                      WrapCrossAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Don't have an account?",
+                                      style: AppTextStyles.bodyMd,
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          context.go(AppRoutes.signUp),
+                                      child: const Text('Create account'),
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ),
-                          ],
-                          const SizedBox(height: 8),
-                          Text(
-                            'Admin: demo@archvault.com / password123\n'
-                            'User: user@archvault.com / password123',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.labelMd.copyWith(
-                              color: AppColors.onSurfaceVariant,
-                            ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Admin: demo@archvault.com / password123\n'
+                                'User: user@archvault.com / password123',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.labelMd.copyWith(
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
-          ),
+
+            // ── Close / Skip button (visitor mode) ────────────────────────────
+            if (widget.showSkip)
+              Positioned(
+                top: 12,
+                right: 12,
+                child: SafeArea(
+                  child: Tooltip(
+                    message: 'Continue as visitor',
+                    child: IconButton(
+                      onPressed: () => context.go(AppRoutes.home),
+                      style: IconButton.styleFrom(
+                        backgroundColor:
+                            AppColors.brandSecondarySurface.withValues(
+                          alpha: 0.8,
+                        ),
+                      ),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: AppColors.textWhite,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

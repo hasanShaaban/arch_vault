@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_routes.dart';
@@ -39,7 +39,13 @@ class _RoleSelectionViewState extends State<RoleSelectionView>
     setState(() => _pressedRole = role);
     await Future.delayed(const Duration(milliseconds: 180));
     if (!mounted) return;
-    context.go(AppRoutes.signIn, extra: role);
+    if (role == 'admin') {
+      // Admin must log in
+      context.go(AppRoutes.signIn, extra: role);
+    } else {
+      // Regular user goes straight to home as a visitor
+      context.go(AppRoutes.home);
+    }
   }
 
   @override
@@ -57,59 +63,87 @@ class _RoleSelectionViewState extends State<RoleSelectionView>
           ),
         ),
         child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnim,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Spacer(),
-                  Text(
-                    'ArchVault',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.headlineSm.copyWith(
-                      color: AppColors.brandAccentPrimary,
+          child: Stack(
+            children: [
+              // ── Main content ─────────────────────────────────────────────────
+              FadeTransition(
+                opacity: _fadeAnim,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 40,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Spacer(),
+                      Text(
+                        'ArchVault',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.headlineSm.copyWith(
+                          color: AppColors.brandAccentPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Continue as',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.headlineMd,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Select your role to get started',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.bodyMd,
+                      ),
+                      const Spacer(),
+                      _RoleCard(
+                        label: 'Admin',
+                        description: 'Manage users, reports and content',
+                        icon: Icons.admin_panel_settings_rounded,
+                        accentColor: AppColors.tertiary,
+                        iconBackground:
+                            AppColors.tertiaryContainer.withValues(alpha: 0.15),
+                        isPressed: _pressedRole == 'admin',
+                        onTap: () => _selectRole('admin'),
+                      ),
+                      const SizedBox(height: 16),
+                      _RoleCard(
+                        label: 'User',
+                        description: 'Browse and discover 3D models — no login required',
+                        icon: Icons.person_rounded,
+                        accentColor: AppColors.brandAccentPrimary,
+                        iconBackground: AppColors.brandAccentPrimary
+                            .withValues(alpha: 0.12),
+                        isPressed: _pressedRole == 'user',
+                        onTap: () => _selectRole('user'),
+                      ),
+                      const Spacer(flex: 2),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Close / Skip button ──────────────────────────────────────────
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Tooltip(
+                  message: 'Continue as visitor',
+                  child: IconButton(
+                    onPressed: () => context.go(AppRoutes.home),
+                    style: IconButton.styleFrom(
+                      backgroundColor:
+                          AppColors.brandSecondarySurface.withValues(alpha: 0.7),
+                    ),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: AppColors.textWhite,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Continue as',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.headlineMd,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Select your role to get started',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.bodyMd,
-                  ),
-                  const Spacer(),
-                  _RoleCard(
-                    label: 'Admin',
-                    description: 'Manage users, reports and content',
-                    icon: Icons.admin_panel_settings_rounded,
-                    accentColor: AppColors.tertiary,
-                    iconBackground:
-                        AppColors.tertiaryContainer.withValues(alpha: 0.15),
-                    isPressed: _pressedRole == 'admin',
-                    onTap: () => _selectRole('admin'),
-                  ),
-                  const SizedBox(height: 16),
-                  _RoleCard(
-                    label: 'User',
-                    description: 'Browse, upload and manage your vault',
-                    icon: Icons.person_rounded,
-                    accentColor: AppColors.brandAccentPrimary,
-                    iconBackground:
-                        AppColors.brandAccentPrimary.withValues(alpha: 0.12),
-                    isPressed: _pressedRole == 'user',
-                    onTap: () => _selectRole('user'),
-                  ),
-                  const Spacer(flex: 2),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

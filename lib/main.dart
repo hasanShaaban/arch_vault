@@ -6,6 +6,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/domain/repo/auth_repo.dart';
 import 'features/auth/presentation/manager/login_cubit/login_cubit.dart';
+import 'features/auth/presentation/manager/visitor_session_cubit/visitor_session_cubit.dart';
 import 'features/auth/presentation/manager/signup_cubit/signup_cubit.dart';
 import 'features/browse/domain/repo/browse_repo.dart';
 import 'features/browse/presentation/manager/browse_cubit/browse_cubit.dart';
@@ -59,6 +60,7 @@ class _ArchVaultAppState extends State<ArchVaultApp> {
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider<VisitorSessionCubit>(create: (_) => VisitorSessionCubit()),
           BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>()),
           BlocProvider<SignUpCubit>(create: (_) => sl<SignUpCubit>()),
           BlocProvider<HomeCubit>(create: (_) => sl<HomeCubit>()),

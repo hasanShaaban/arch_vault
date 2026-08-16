@@ -8,7 +8,9 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_state_views.dart';
 import '../../../../core/widgets/app_top_bar.dart';
 import '../../../../core/widgets/app_widgets.dart';
+import '../../../../core/widgets/auth_gate_dialog.dart';
 import '../../../../core/widgets/preview_image.dart';
+import '../../../../features/auth/presentation/manager/visitor_session_cubit/visitor_session_cubit.dart';
 import '../../domain/entities/model_detail_entity.dart';
 import '../manager/model_detail_cubit/model_detail_cubit.dart';
 import '../manager/model_detail_cubit/model_detail_state.dart';
@@ -288,10 +290,22 @@ class _InfoCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          PrimaryButton(
-            label: 'Download model',
-            isLoading: state.isDownloading,
-            onPressed: cubit.download,
+          Builder(
+            builder: (context) {
+              final isGuest =
+                  context.read<VisitorSessionCubit>().state
+                      is VisitorSessionGuest;
+              return PrimaryButton(
+                label: 'Download model',
+                isLoading: state.isDownloading,
+                onPressed: isGuest
+                    ? () => showAuthGateDialog(
+                          context,
+                          action: 'download this model',
+                        )
+                    : cubit.download,
+              );
+            },
           ),
         ],
       ),

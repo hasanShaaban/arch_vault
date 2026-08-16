@@ -4,33 +4,24 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/model_3d_entity.dart';
 
-/// Card that displays a [Model3dEntity] in the home grid.
-///
-/// Fields without a remote URL yet (e.g. thumbnail image) show a
-/// placeholder widget marked with a ⚠ TODO badge so it is obvious
-/// in the UI what still needs to be wired up.
 class Model3dCard extends StatelessWidget {
-  const Model3dCard({
-    super.key,
-    required this.model,
-    this.onTap,
-  });
+  const Model3dCard({super.key, required this.model, this.onTap});
 
   final Model3dEntity model;
   final VoidCallback? onTap;
 
   /// Derives a human-readable title from the source_file filename.
   /// e.g. "modern__sofa.glb" → "Modern Sofa"
-  String get _displayTitle {
-    final name = model.sourceFile
-        .replaceAll(RegExp(r'\.glb$', caseSensitive: false), '')
-        .replaceAll(RegExp(r'[_\-]+'), ' ')
-        .trim();
-    return name
-        .split(' ')
-        .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
-        .join(' ');
-  }
+  // String get _displayTitle {
+  //   final name = model.sourceFile
+  //       .replaceAll(RegExp(r'\.glb$', caseSensitive: false), '')
+  //       .replaceAll(RegExp(r'[_\-]+'), ' ')
+  //       .trim();
+  //   return name
+  //       .split(' ')
+  //       .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
+  //       .join(' ');
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +40,9 @@ class Model3dCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // ── Thumbnail / placeholder ──────────────────────────────────
-            Expanded(child: _ThumbnailPlaceholder(title: _displayTitle)),
-
+            Expanded(
+              child: _ThumbnailPlaceholder(title: 'TODO:ModleName'),
+            ), //TODO:Model name
             // ── Info row ─────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(12),
@@ -59,7 +51,7 @@ class Model3dCard extends StatelessWidget {
                 children: [
                   // Title (derived from filename)
                   Text(
-                    _displayTitle,
+                    "TODO:ModelName",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.bodyMd.copyWith(
@@ -168,12 +160,12 @@ class _ThumbnailPlaceholder extends StatelessWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color:
-                        AppColors.brandAccentPrimary.withValues(alpha: 0.12),
+                    color: AppColors.brandAccentPrimary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color:
-                          AppColors.brandAccentPrimary.withValues(alpha: 0.3),
+                      color: AppColors.brandAccentPrimary.withValues(
+                        alpha: 0.3,
+                      ),
                     ),
                   ),
                   child: Row(
@@ -182,16 +174,18 @@ class _ThumbnailPlaceholder extends StatelessWidget {
                       Icon(
                         Icons.construction_rounded,
                         size: 11,
-                        color: AppColors.brandAccentPrimary
-                            .withValues(alpha: 0.7),
+                        color: AppColors.brandAccentPrimary.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'Preview TODO',
                         style: AppTextStyles.labelMd.copyWith(
                           fontSize: 10,
-                          color: AppColors.brandAccentPrimary
-                              .withValues(alpha: 0.7),
+                          color: AppColors.brandAccentPrimary.withValues(
+                            alpha: 0.7,
+                          ),
                           letterSpacing: 0.4,
                         ),
                       ),

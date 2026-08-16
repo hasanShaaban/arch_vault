@@ -42,8 +42,9 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.signIn,
           builder: (context, state) {
-            final role = (state.extra is String) ? state.extra as String : 'user';
-            return LoginView(role: role);
+            final role =
+                (state.extra is String) ? state.extra as String : 'user';
+            return LoginView(role: role, showSkip: role != 'admin');
           },
         ),
         GoRoute(

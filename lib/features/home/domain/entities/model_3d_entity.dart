@@ -1,7 +1,6 @@
 class Model3dEntity {
   const Model3dEntity({
     required this.id,
-    required this.sourceFile,
     required this.uploadedAt,
     required this.isActive,
     required this.viewsCount,
@@ -17,7 +16,7 @@ class Model3dEntity {
   });
 
   final String id;
-  final String sourceFile;
+
   final DateTime uploadedAt;
   final bool isActive;
   final String? aiLabel;

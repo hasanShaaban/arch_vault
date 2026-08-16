@@ -8,6 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_widgets.dart';
 import '../manager/signup_cubit/signup_cubit.dart';
 import '../manager/signup_cubit/signup_state.dart';
+import '../manager/visitor_session_cubit/visitor_session_cubit.dart';
 import 'widget/auth_form_fields.dart';
 
 class SignUpView extends StatefulWidget {
@@ -67,129 +68,159 @@ class _SignUpViewState extends State<SignUpView> {
             ],
           ),
         ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: BlocConsumer<SignUpCubit, SignUpState>(
-                listener: (context, state) {
-                  if (state is SignUpSuccess) {
-                    context.go(AppRoutes.home);
-                  } else if (state is SignUpFailureState) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.message)),
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  final loading = state is SignUpLoading;
-                  return Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppColors.brandSecondarySurface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'ArchVault',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.headlineSm.copyWith(
-                              color: AppColors.brandAccentPrimary,
-                            ),
+        child: Stack(
+          children: [
+            // ── Main form ───────────────────────────────────────────────────
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: BlocConsumer<SignUpCubit, SignUpState>(
+                    listener: (context, state) {
+                      if (state is SignUpSuccess) {
+                        // Mark the session as authenticated
+                        context.read<VisitorSessionCubit>().setLoggedIn(role: 'user');
+                        context.go(AppRoutes.home);
+                      } else if (state is SignUpFailureState) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(state.message)),
+                        );
+                      }
+                    },
+                    builder: (context, state) {
+                      final loading = state is SignUpLoading;
+                      return Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandSecondarySurface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.outlineVariant
+                                .withValues(alpha: 0.5),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Create account',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.headlineSm,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Join architects sharing high-fidelity 3D assets',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.bodyMd,
-                          ),
-                          const SizedBox(height: 24),
-                          UsernameTextField(
-                            controller: _usernameController,
-                            focusNode: _usernameFocus,
-                            textInputAction: TextInputAction.next,
-                            onFieldSubmitted: (_) =>
-                                _emailFocus.requestFocus(),
-                          ),
-                          const SizedBox(height: 12),
-                          EmailTextField(
-                            controller: _emailController,
-                            focusNode: _emailFocus,
-                            textInputAction: TextInputAction.next,
-                            onFieldSubmitted: (_) =>
-                                _passwordFocus.requestFocus(),
-                          ),
-                          const SizedBox(height: 12),
-                          PasswordTextField(
-                            controller: _passwordController,
-                            focusNode: _passwordFocus,
-                            textInputAction: TextInputAction.next,
-                            onFieldSubmitted: (_) =>
-                                _confirmPasswordFocus.requestFocus(),
-                          ),
-                          const SizedBox(height: 12),
-                          ConfirmPasswordTextField(
-                            controller: _confirmPasswordController,
-                            passwordController: _passwordController,
-                            focusNode: _confirmPasswordFocus,
-                            textInputAction: TextInputAction.done,
-                            onFieldSubmitted: (_) => _submit(),
-                          ),
-                          const SizedBox(height: 12),
-                          RoleDropdownField(
-                            value: _selectedRole,
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() => _selectedRole = value);
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 24),
-                          PrimaryButton(
-                            label: 'Create Account',
-                            isLoading: loading,
-                            onPressed: _submit,
-                          ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            crossAxisAlignment: WrapCrossAlignment.center,
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                'Already have an account?',
+                                'ArchVault',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.headlineSm.copyWith(
+                                  color: AppColors.brandAccentPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Create account',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.headlineSm,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Join architects sharing high-fidelity 3D assets',
+                                textAlign: TextAlign.center,
                                 style: AppTextStyles.bodyMd,
                               ),
-                              TextButton(
-                                onPressed: () => context.go(
-                                  AppRoutes.signIn,
-                                  extra: 'user',
-                                ),
-                                child: const Text('Sign in'),
+                              const SizedBox(height: 24),
+                              UsernameTextField(
+                                controller: _usernameController,
+                                focusNode: _usernameFocus,
+                                textInputAction: TextInputAction.next,
+                                onFieldSubmitted: (_) =>
+                                    _emailFocus.requestFocus(),
+                              ),
+                              const SizedBox(height: 12),
+                              EmailTextField(
+                                controller: _emailController,
+                                focusNode: _emailFocus,
+                                textInputAction: TextInputAction.next,
+                                onFieldSubmitted: (_) =>
+                                    _passwordFocus.requestFocus(),
+                              ),
+                              const SizedBox(height: 12),
+                              PasswordTextField(
+                                controller: _passwordController,
+                                focusNode: _passwordFocus,
+                                textInputAction: TextInputAction.next,
+                                onFieldSubmitted: (_) =>
+                                    _confirmPasswordFocus.requestFocus(),
+                              ),
+                              const SizedBox(height: 12),
+                              ConfirmPasswordTextField(
+                                controller: _confirmPasswordController,
+                                passwordController: _passwordController,
+                                focusNode: _confirmPasswordFocus,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _submit(),
+                              ),
+                              const SizedBox(height: 12),
+                              RoleDropdownField(
+                                value: _selectedRole,
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _selectedRole = value);
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 24),
+                              PrimaryButton(
+                                label: 'Create Account',
+                                isLoading: loading,
+                                onPressed: _submit,
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                alignment: WrapAlignment.center,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  Text(
+                                    'Already have an account?',
+                                    style: AppTextStyles.bodyMd,
+                                  ),
+                                  TextButton(
+                                    onPressed: () => context.go(
+                                      AppRoutes.signIn,
+                                      extra: 'user',
+                                    ),
+                                    child: const Text('Sign in'),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
-          ),
+
+            // ── Close / Skip button ────────────────────────────────────────────
+            Positioned(
+              top: 12,
+              right: 12,
+              child: SafeArea(
+                child: Tooltip(
+                  message: 'Continue as visitor',
+                  child: IconButton(
+                    onPressed: () => context.go(AppRoutes.home),
+                    style: IconButton.styleFrom(
+                      backgroundColor:
+                          AppColors.brandSecondarySurface.withValues(alpha: 0.8),
+                    ),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: AppColors.textWhite,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
