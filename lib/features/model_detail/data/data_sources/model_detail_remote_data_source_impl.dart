@@ -27,4 +27,17 @@ class ModelDetailRemoteDataSourceImpl implements ModelDetailRemoteDataSource {
       throw ServerException(message: 'Failed to get models');
     }
   }
+
+  @override
+  Future<bool> reportModel({required String id, required String reason}) async {
+    try {
+      final response = await apiService.post(
+        'models/report/',
+        body: {'model': id, 'reason': reason},
+      );
+      return response.statusCode == 201;
+    } catch (e) {
+      throw ServerException(message: 'Failed to report model');
+    }
+  }
 }

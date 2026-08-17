@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../domain/entities/admin_dashboard_entity.dart';
+import '../../domain/entities/get_reports_response_entity.dart';
 
 sealed class AdminState extends Equatable {
   const AdminState();
@@ -18,18 +18,14 @@ class AdminLoading extends AdminState {
 }
 
 class AdminLoaded extends AdminState {
-  const AdminLoaded(
-    this.dashboard, {
-    this.actionInProgress = false,
-    this.actionError,
+  const AdminLoaded({
+    required this.reportsResponse,
   });
 
-  final AdminDashboardEntity dashboard;
-  final bool actionInProgress;
-  final String? actionError;
+  final GetReportsResponseEntity reportsResponse;
 
   @override
-  List<Object?> get props => [dashboard, actionInProgress, actionError];
+  List<Object?> get props => [reportsResponse];
 }
 
 class AdminFailure extends AdminState {

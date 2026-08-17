@@ -18,6 +18,7 @@ import '../../../home/domain/entities/model_3d_entity.dart';
 import '../../../home/presentation/views/widget/model_3d_card.dart';
 import '../manager/similar_models_cubit/similar_models_cubit.dart';
 import '../manager/similar_models_cubit/similar_models_state.dart';
+import 'widget/report_model_dialog.dart';
 
 class ModelDetailView extends StatelessWidget {
   const ModelDetailView({super.key, required this.modelId, this.model});
@@ -428,17 +429,48 @@ class _InfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Title
-          Text(model.title ?? 'Untitled', style: AppTextStyles.headlineSm),
-          if (model.uploadedBy != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'by @${model.uploadedBy!.username.split('@').first}',
-              style: AppTextStyles.labelMd.copyWith(
-                color: AppColors.brandAccentPrimary,
+          // Title & Report button
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(model.title ?? 'Untitled', style: AppTextStyles.headlineSm),
+                    if (model.uploadedBy != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'by @${model.uploadedBy!.username.split('@').first}',
+                        style: AppTextStyles.labelMd.copyWith(
+                          color: AppColors.brandAccentPrimary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ),
-          ],
+              IconButton(
+                icon: const Icon(
+                  Icons.flag_outlined,
+                  color: Colors.redAccent,
+                  size: 22,
+                ),
+                tooltip: 'Report model',
+                onPressed: () {
+                  final isGuest =
+                      context.read<VisitorSessionCubit>().state
+                          is VisitorSessionGuest;
+                  if (isGuest) {
+                    showAuthGateDialog(context, action: 'report this model');
+                  } else {
+                    ReportModelDialog.show(context, modelId: model.id);
+                  }
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(
             [

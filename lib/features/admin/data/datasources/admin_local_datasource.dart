@@ -1,3 +1,4 @@
+import '../../../home/data/models/model_3d_model.dart';
 import '../../domain/entities/admin_dashboard_entity.dart';
 import '../models/admin_stats_model.dart';
 import '../models/admin_user_model.dart';
@@ -31,31 +32,54 @@ class AdminLocalDataSourceImpl implements AdminLocalDataSource {
   void _seed() {
     _reports = [
       ReportModel(
-        id: 'r1',
-        modelId: '1',
-        modelTitle: 'Modern Villa Atrium',
+        id: 1,
+        model: Model3dModel(
+          id: '1',
+          title: 'Modern Villa Atrium',
+          uploadedAt: DateTime.now(),
+          isActive: true,
+          viewsCount: 10,
+          downloadsCount: 5,
+          usageCount: 2,
+          ratingScore: 4,
+        ),
+        reporter: UploadedByModel(
+          id: 1,
+          email: 'nova@archvault.com',
+          username: 'nova_design',
+          role: 'user',
+          dateJoined: DateTime.now(),
+        ),
         reason: 'Inappropriate content',
-        reporterUsername: 'nova_design',
         status: 'open',
+        adminNote: '',
         createdAt: DateTime.now().subtract(const Duration(hours: 5)),
+        updatedAt: DateTime.now().subtract(const Duration(hours: 5)),
       ),
       ReportModel(
-        id: 'r2',
-        modelId: '3',
-        modelTitle: 'Cultural Pavilion',
+        id: 2,
+        model: Model3dModel(
+          id: '3',
+          title: 'Cultural Pavilion',
+          uploadedAt: DateTime.now(),
+          isActive: true,
+          viewsCount: 15,
+          downloadsCount: 8,
+          usageCount: 4,
+          ratingScore: 5,
+        ),
+        reporter: UploadedByModel(
+          id: 2,
+          email: 'build@archvault.com',
+          username: 'build_lab',
+          role: 'user',
+          dateJoined: DateTime.now(),
+        ),
         reason: 'Wrong category / misleading labels',
-        reporterUsername: 'build_lab',
         status: 'open',
+        adminNote: '',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      ReportModel(
-        id: 'r3',
-        modelId: '5',
-        modelTitle: 'Urban Mixed-Use Block',
-        reason: 'Low-quality upload',
-        reporterUsername: 'arch_kit',
-        status: 'resolved',
-        createdAt: DateTime.now().subtract(const Duration(days: 3)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
     ];
 
@@ -143,7 +167,7 @@ class AdminLocalDataSourceImpl implements AdminLocalDataSource {
   @override
   Future<void> resolveReport(String id) async {
     await Future<void>.delayed(const Duration(milliseconds: 250));
-    final index = _reports.indexWhere((r) => r.id == id);
+    final index = _reports.indexWhere((r) => r.id.toString() == id);
     if (index < 0) {
       throw Exception('Report not found');
     }
@@ -153,7 +177,7 @@ class AdminLocalDataSourceImpl implements AdminLocalDataSource {
   @override
   Future<void> dismissReport(String id) async {
     await Future<void>.delayed(const Duration(milliseconds: 250));
-    final index = _reports.indexWhere((r) => r.id == id);
+    final index = _reports.indexWhere((r) => r.id.toString() == id);
     if (index < 0) {
       throw Exception('Report not found');
     }

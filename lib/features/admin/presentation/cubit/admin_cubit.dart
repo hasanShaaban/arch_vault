@@ -8,48 +8,14 @@ class AdminCubit extends Cubit<AdminState> {
 
   final AdminRepo _repo;
 
-  Future<void> loadDashboard() async {
+  Future<void> getReports() async {
     emit(const AdminLoading());
-    try {
-      final dashboard = await _repo.getDashboard();
-      emit(AdminLoaded(dashboard));
-    } catch (e) {
-      emit(AdminFailure(e.toString()));
-    }
-  }
 
-  Future<void> resolveReport(String id) => _runAction(
-        () => _repo.resolveReport(id),
-      );
+    final result = await _repo.getReports();
 
-  Future<void> dismissReport(String id) => _runAction(
-        () => _repo.dismissReport(id),
-      );
-
-  Future<void> setUserRole(String id, String role) => _runAction(
-        () => _repo.setUserRole(id, role),
-      );
-
-  Future<void> updateModelLabel(String modelId, String label) => _runAction(
-        () => _repo.updateModelLabel(modelId, label),
-      );
-
-  Future<void> _runAction(Future<void> Function() action) async {
-    final current = state;
-    if (current is! AdminLoaded) return;
-
-    emit(AdminLoaded(current.dashboard, actionInProgress: true));
-    try {
-      await action();
-      final dashboard = await _repo.getDashboard();
-      emit(AdminLoaded(dashboard));
-    } catch (e) {
-      emit(
-        AdminLoaded(
-          current.dashboard,
-          actionError: e.toString(),
-        ),
-      );
-    }
+    result.fold(
+      (failure) => emit(AdminFailure(failure.message)),
+      (response) => emit(AdminLoaded(reportsResponse: response)),
+    );
   }
 }

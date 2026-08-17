@@ -1,21 +1,42 @@
-class ReportEntity {
+import 'package:equatable/equatable.dart';
+
+import '../../../home/domain/entities/model_3d_entity.dart';
+
+class ReportEntity extends Equatable {
   const ReportEntity({
     required this.id,
-    required this.modelId,
-    required this.modelTitle,
+    required this.model,
+    required this.reporter,
     required this.reason,
-    required this.reporterUsername,
     required this.status,
+    this.adminNote,
     required this.createdAt,
+    required this.updatedAt,
   });
 
-  final String id;
-  final String modelId;
-  final String modelTitle;
+  final int id;
+  final Model3dEntity model;
+  final UploadedByEntity reporter;
   final String reason;
-  final String reporterUsername;
-
-  /// `open`, `resolved`, or `dismissed`.
   final String status;
+  final String? adminNote;
   final DateTime createdAt;
+  final DateTime updatedAt;
+
+  /// Convenience getters for UI display
+  String get modelId => model.id;
+  String get modelTitle => model.title ?? 'Untitled';
+  String get reporterUsername => reporter.username;
+
+  @override
+  List<Object?> get props => [
+        id,
+        model,
+        reporter,
+        reason,
+        status,
+        adminNote,
+        createdAt,
+        updatedAt,
+      ];
 }

@@ -35,6 +35,24 @@ class ModelDetailRepoImpl implements ModelDetailRepo {
     }
   }
 
+  @override
+  Future<Either<Failure, bool>> reportModel({
+    required String id,
+    required String reason,
+  }) async {
+    try {
+      final response = await _remoteDataSource.reportModel(
+        id: id,
+        reason: reason,
+      );
+      return right(response);
+    } on AppException catch (e) {
+      return left(mapExceptionToFailure(e));
+    } catch (_) {
+      return left(UnknownFailure());
+    }
+  }
+
   // @override
   // Future<void> downloadModel(String id) {
   //   return _localDataSource.downloadModel(id);

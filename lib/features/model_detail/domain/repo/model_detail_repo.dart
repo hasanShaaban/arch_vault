@@ -10,4 +10,8 @@ abstract class ModelDetailRepo {
   // Future<void> downloadModel(String id);
 
   // Future<double> rateModel({required String id, required int stars});
+  Future<Either<Failure, bool>> reportModel({
+    required String id,
+    required String reason,
+  });
 }

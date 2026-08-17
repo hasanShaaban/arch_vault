@@ -1,13 +1,7 @@
-import '../entities/admin_dashboard_entity.dart';
+import 'package:arch_vault/core/errors/failure.dart';
+import 'package:arch_vault/features/admin/domain/entities/get_reports_response_entity.dart';
+import 'package:dartz/dartz.dart';
 
 abstract class AdminRepo {
-  Future<AdminDashboardEntity> getDashboard();
-
-  Future<void> resolveReport(String id);
-
-  Future<void> dismissReport(String id);
-
-  Future<void> setUserRole(String id, String role);
-
-  Future<void> updateModelLabel(String modelId, String label);
+  Future<Either<Failure, GetReportsResponseEntity>> getReports();
 }

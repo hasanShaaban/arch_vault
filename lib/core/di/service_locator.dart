@@ -46,6 +46,7 @@ import '../../features/model_detail/data/data_sources/model_detail_remote_data_s
 import '../../features/model_detail/domain/data_source/model_detail_remote_data_source.dart';
 import '../../features/model_detail/data/repo/model_detail_repo_impl.dart';
 import '../../features/model_detail/domain/repo/model_detail_repo.dart';
+import '../../features/model_detail/presentation/manager/report_model_cubit/report_model_cubit.dart';
 import '../../features/model_detail/presentation/manager/similar_models_cubit/similar_models_cubit.dart';
 
 // --- Collections ---
@@ -66,6 +67,7 @@ import '../../features/upload/domain/repo/upload_repo.dart';
 
 // --- Admin ---
 import '../../features/admin/data/datasources/admin_local_datasource.dart';
+import '../../features/admin/data/datasources/admin_remote_datasource.dart';
 import '../../features/admin/data/repositories/admin_repo_impl.dart';
 import '../../features/admin/domain/repositories/admin_repo.dart';
 import '../../features/admin/presentation/cubit/admin_cubit.dart';
@@ -158,6 +160,9 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory<SimilarModelsCubit>(
     () => SimilarModelsCubit(sl<ModelDetailRepo>()),
   );
+  sl.registerFactory<ReportModelCubit>(
+    () => ReportModelCubit(sl<ModelDetailRepo>()),
+  );
 
   // ─── Collections ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<CollectionsLocalDataSource>(
@@ -202,9 +207,13 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<AdminLocalDataSource>(
     () => AdminLocalDataSourceImpl(),
   );
+  sl.registerLazySingleton<AdminRemoteDataSource>(
+    () => AdminRemoteDataSourceImpl(sl<ApiService>()),
+  );
 
   sl.registerLazySingleton<AdminRepo>(
-    () => AdminRepoImpl(sl<AdminLocalDataSource>()),
+    () =>
+        AdminRepoImpl(sl<AdminLocalDataSource>(), sl<AdminRemoteDataSource>()),
   );
 
   sl.registerFactory<AdminCubit>(() => AdminCubit(sl<AdminRepo>()));

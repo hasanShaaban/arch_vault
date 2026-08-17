@@ -1,43 +1,74 @@
+import '../../../home/data/models/model_3d_model.dart';
 import '../../domain/entities/report_entity.dart';
 
-class ReportModel {
+class ReportModel extends ReportEntity {
   const ReportModel({
-    required this.id,
-    required this.modelId,
-    required this.modelTitle,
-    required this.reason,
-    required this.reporterUsername,
-    required this.status,
-    required this.createdAt,
+    required super.id,
+    required super.model,
+    required super.reporter,
+    required super.reason,
+    required super.status,
+    super.adminNote,
+    required super.createdAt,
+    required super.updatedAt,
   });
 
-  final String id;
-  final String modelId;
-  final String modelTitle;
-  final String reason;
-  final String reporterUsername;
-  final String status;
-  final DateTime createdAt;
+  factory ReportModel.fromJson(Map<String, dynamic> json) => ReportModel(
+        id: json['id'] is int
+            ? json['id'] as int
+            : int.parse(json['id'].toString()),
+        model: Model3dModel.fromJson(json['model'] as Map<String, dynamic>),
+        reporter: UploadedByModel.fromJson(
+          json['reporter'] as Map<String, dynamic>,
+        ),
+        reason: json['reason'] as String? ?? '',
+        status: json['status'] as String? ?? 'pending',
+        adminNote: json['admin_note'] as String?,
+        createdAt: DateTime.parse(json['created_at'] as String),
+        updatedAt: DateTime.parse(json['updated_at'] as String),
+      );
 
-  ReportModel copyWith({String? status}) {
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'model': (model as Model3dModel).toJson(),
+        'reporter': (reporter as UploadedByModel).toJson(),
+        'reason': reason,
+        'status': status,
+        'admin_note': adminNote,
+        'created_at': createdAt.toIso8601String(),
+        'updated_at': updatedAt.toIso8601String(),
+      };
+
+  ReportModel copyWith({
+    int? id,
+    Model3dModel? model,
+    UploadedByModel? reporter,
+    String? reason,
+    String? status,
+    String? adminNote,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
     return ReportModel(
-      id: id,
-      modelId: modelId,
-      modelTitle: modelTitle,
-      reason: reason,
-      reporterUsername: reporterUsername,
+      id: id ?? this.id,
+      model: model ?? (this.model as Model3dModel),
+      reporter: reporter ?? (this.reporter as UploadedByModel),
+      reason: reason ?? this.reason,
       status: status ?? this.status,
-      createdAt: createdAt,
+      adminNote: adminNote ?? this.adminNote,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
   ReportEntity toEntity() => ReportEntity(
         id: id,
-        modelId: modelId,
-        modelTitle: modelTitle,
+        model: model,
+        reporter: reporter,
         reason: reason,
-        reporterUsername: reporterUsername,
         status: status,
+        adminNote: adminNote,
         createdAt: createdAt,
+        updatedAt: updatedAt,
       );
 }

@@ -1,34 +1,40 @@
-import '../../domain/entities/admin_dashboard_entity.dart';
+import 'package:arch_vault/core/errors/exceptions.dart';
+import 'package:arch_vault/core/network/api_service.dart';
+import 'package:arch_vault/features/admin/data/models/get_reports_response_model.dart';
+import 'package:arch_vault/features/admin/domain/entities/get_reports_response_entity.dart';
+import 'package:dio/dio.dart';
 
 abstract class AdminRemoteDataSource {
-  Future<AdminDashboardEntity> getDashboard();
+  // Future<AdminDashboardEntity> getDashboard();
 
-  Future<void> resolveReport(String id);
+  // Future<void> resolveReport(String id);
 
-  Future<void> dismissReport(String id);
+  // Future<void> dismissReport(String id);
 
-  Future<void> setUserRole(String id, String role);
+  // Future<void> setUserRole(String id, String role);
 
-  Future<void> updateModelLabel(String modelId, String label);
+  // Future<void> updateModelLabel(String modelId, String label);
+  Future<GetReportsResponseEntity> getResponse();
 }
 
 class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
-  Never _notReady() =>
-      throw UnimplementedError('Admin remote API is not connected yet.');
+  final ApiService apiService;
+
+  AdminRemoteDataSourceImpl(this.apiService);
 
   @override
-  Future<AdminDashboardEntity> getDashboard() async => _notReady();
-
-  @override
-  Future<void> resolveReport(String id) async => _notReady();
-
-  @override
-  Future<void> dismissReport(String id) async => _notReady();
-
-  @override
-  Future<void> setUserRole(String id, String role) async => _notReady();
-
-  @override
-  Future<void> updateModelLabel(String modelId, String label) async =>
-      _notReady();
+  Future<GetReportsResponseEntity> getResponse() async {
+    try {
+      final response = await apiService.get('models/admin/reports/');
+      final data = response.data;
+      if (data == null) {
+        throw ServerException(message: 'Invalid response from server');
+      }
+      return GetReportsResponseModel.fromJson(data);
+    } on DioException catch (e) {
+      throw AppException.handelDioException(e);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get models');
+    }
+  }
 }
