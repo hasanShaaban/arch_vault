@@ -1,4 +1,4 @@
-import 'package:arch_vault/features/home/data/data_sources/home_remote_data_source.dart';
+import 'package:arch_vault/features/home/data/data_sources/home_remote_data_source_impl.dart';
 import 'package:arch_vault/features/home/domain/data_source/home_remote_data_sorce.dart';
 import 'package:arch_vault/features/upload/data/data_sources/upload_remote_data_source.dart';
 import 'package:arch_vault/features/upload/domain/data_source/upload_model_remote_data_source.dart';
@@ -39,9 +39,11 @@ import '../../features/browse/domain/repo/browse_repo.dart';
 import '../../features/browse/presentation/manager/browse_cubit/browse_cubit.dart';
 
 // --- Model Detail ---
-import '../../features/model_detail/data/data_sources/model_detail_local_data_source.dart';
+import '../../features/model_detail/data/data_sources/model_detail_remote_data_source_impl.dart';
+import '../../features/model_detail/domain/data_source/model_detail_remote_data_source.dart';
 import '../../features/model_detail/data/repo/model_detail_repo_impl.dart';
 import '../../features/model_detail/domain/repo/model_detail_repo.dart';
+import '../../features/model_detail/presentation/manager/similar_models_cubit/similar_models_cubit.dart';
 
 // --- Collections ---
 import '../../features/collections/data/data_sources/collections_local_data_source.dart';
@@ -135,13 +137,17 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory<BrowseCubit>(() => BrowseCubit(sl<BrowseRepo>()));
 
   // ─── Model Detail ─────────────────────────────────────────────────────────
-  // sl.registerLazySingleton<ModelDetailLocalDataSource>(
-  //   () => ModelDetailLocalDataSourceImpl(),
-  // );
+  sl.registerLazySingleton<ModelDetailRemoteDataSource>(
+    () => ModelDetailRemoteDataSourceImpl(sl<ApiService>()),
+  );
 
-  // sl.registerLazySingleton<ModelDetailRepo>(
-  //   () => ModelDetailRepoImpl(sl<ModelDetailLocalDataSource>()),
-  // );
+  sl.registerLazySingleton<ModelDetailRepo>(
+    () => ModelDetailRepoImpl(sl<ModelDetailRemoteDataSource>()),
+  );
+
+  sl.registerFactory<SimilarModelsCubit>(
+    () => SimilarModelsCubit(sl<ModelDetailRepo>()),
+  );
 
   // ─── Collections ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<CollectionsLocalDataSource>(

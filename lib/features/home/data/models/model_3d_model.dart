@@ -1,6 +1,33 @@
 import '../../../../features/upload/data/models/upload_model_response_model.dart';
 import '../../domain/entities/model_3d_entity.dart';
 
+class UploadedByModel extends UploadedByEntity {
+  const UploadedByModel({
+    required super.id,
+    required super.email,
+    required super.username,
+    required super.role,
+    required super.dateJoined,
+  });
+
+  factory UploadedByModel.fromJson(Map<String, dynamic> json) =>
+      UploadedByModel(
+        id: json['id'] as int,
+        email: json['email'] as String,
+        username: json['username'] as String,
+        role: json['role'] as String,
+        dateJoined: DateTime.parse(json['date_joined'] as String),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'email': email,
+        'username': username,
+        'role': role,
+        'date_joined': dateJoined.toIso8601String(),
+      };
+}
+
 class Model3dModel extends Model3dEntity {
   const Model3dModel({
     required super.id,
@@ -21,6 +48,8 @@ class Model3dModel extends Model3dEntity {
     super.vertices,
     super.faces,
     super.predictions,
+    super.uploadedBy,
+    super.objectCategory,
   });
 
   factory Model3dModel.fromJson(Map<String, dynamic> json) => Model3dModel(
@@ -48,6 +77,11 @@ class Model3dModel extends Model3dEntity {
             ? ModelPredictionDataModel.fromJson(
                 json['prediction'] as Map<String, dynamic>)
             : null,
+        uploadedBy: json['uploaded_by'] != null
+            ? UploadedByModel.fromJson(
+                json['uploaded_by'] as Map<String, dynamic>)
+            : null,
+        objectCategory: json['object_category'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -71,5 +105,9 @@ class Model3dModel extends Model3dEntity {
         'prediction': predictions != null
             ? (predictions as ModelPredictionDataModel).toJson()
             : null,
+        'uploaded_by': uploadedBy != null
+            ? (uploadedBy as UploadedByModel).toJson()
+            : null,
+        'object_category': objectCategory,
       };
 }

@@ -11,9 +11,13 @@ import '../../../../core/widgets/app_state_views.dart';
 import '../../../../core/widgets/app_top_bar.dart';
 import '../../../../core/widgets/app_widgets.dart';
 import '../../../../core/widgets/auth_gate_dialog.dart';
+import '../../../../core/di/service_locator.dart';
 import '../../../../core/widgets/preview_image.dart';
 import '../../../../features/auth/presentation/manager/visitor_session_cubit/visitor_session_cubit.dart';
 import '../../../home/domain/entities/model_3d_entity.dart';
+import '../../../home/presentation/views/widget/model_3d_card.dart';
+import '../manager/similar_models_cubit/similar_models_cubit.dart';
+import '../manager/similar_models_cubit/similar_models_state.dart';
 
 class ModelDetailView extends StatelessWidget {
   const ModelDetailView({super.key, required this.modelId, this.model});
@@ -34,12 +38,16 @@ class ModelDetailView extends StatelessWidget {
       );
     }
 
-    return Scaffold(
-      body: Column(
-        children: [
-          const AppTopBar(),
-          Expanded(child: _ModelDetailBody(model: model!)),
-        ],
+    return BlocProvider(
+      create: (context) =>
+          sl<SimilarModelsCubit>()..fetchSimilarModels(modelId),
+      child: Scaffold(
+        body: Column(
+          children: [
+            const AppTopBar(),
+            Expanded(child: _ModelDetailBody(model: model!)),
+          ],
+        ),
       ),
     );
   }
@@ -169,15 +177,53 @@ class _ModelDetailBody extends StatelessWidget {
             ],
           ),
 
-          // ── Similar models placeholder ───────────────────────────────────
+          // ── Similar models ───────────────────────────────────
           const SizedBox(height: 32),
           Text('Similar models', style: AppTextStyles.headlineSm),
           const SizedBox(height: 16),
-          const AppEmptyState(
-            icon: Icons.auto_awesome_outlined,
-            title: 'Similar models coming soon',
-            message:
-                'Related models will show here once the detail API is integrated.',
+          BlocBuilder<SimilarModelsCubit, SimilarModelsState>(
+            builder: (context, state) {
+              if (state is SimilarModelsLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is SimilarModelsSuccess) {
+                if (state.models.isEmpty) {
+                  return const AppEmptyState(
+                    icon: Icons.auto_awesome_outlined,
+                    title: 'No similar models found',
+                    message:
+                        'We could not find any models similar to this one.',
+                  );
+                }
+                return SizedBox(
+                  height: 280,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: state.models.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 16),
+                    itemBuilder: (context, index) {
+                      return SizedBox(
+                        width: 220,
+                        child: Model3dCard(
+                          model: state.models[index],
+                          onTap: () => context.push(
+                            AppRoutes.modelDetailPath(state.models[index].id),
+                            extra: state.models[index],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              } else if (state is SimilarModelsFailure) {
+                return AppEmptyState(
+                  icon: Icons.error_outline,
+                  title: 'Error loading similar models',
+                  message: state.message,
+                );
+              }
+              return const SizedBox();
+            },
           ),
         ],
       ),
@@ -384,10 +430,20 @@ class _InfoCard extends StatelessWidget {
         children: [
           // Title
           Text(model.title ?? 'Untitled', style: AppTextStyles.headlineSm),
+          if (model.uploadedBy != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'by @${model.uploadedBy!.username.split('@').first}',
+              style: AppTextStyles.labelMd.copyWith(
+                color: AppColors.brandAccentPrimary,
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           Text(
             [
               if (model.category != null) model.category!,
+              if (model.objectCategory != null) model.objectCategory!,
               if (model.aiLabel != null) model.aiLabel!,
             ].join(' · '),
             style: AppTextStyles.bodyMd,

@@ -1,5 +1,21 @@
 import '../../../../features/upload/domain/entities/upload_model_response_entity.dart';
 
+class UploadedByEntity {
+  const UploadedByEntity({
+    required this.id,
+    required this.email,
+    required this.username,
+    required this.role,
+    required this.dateJoined,
+  });
+
+  final int id;
+  final String email;
+  final String username;
+  final String role;
+  final DateTime dateJoined;
+}
+
 class Model3dEntity {
   const Model3dEntity({
     required this.id,
@@ -20,6 +36,8 @@ class Model3dEntity {
     this.vertices,
     this.faces,
     this.predictions,
+    this.uploadedBy,
+    this.objectCategory,
   });
 
   final String id;
@@ -41,4 +59,6 @@ class Model3dEntity {
   final int usageCount;
   final int ratingScore;
   final ModelPredictionDataEntity? predictions;
+  final UploadedByEntity? uploadedBy;
+  final String? objectCategory;
 }
