@@ -25,6 +25,9 @@ class BrowseLoaded extends BrowseState {
     required this.label,
     required this.fileFormat,
     required this.sortOption,
+    this.superCategory,
+    this.subCategory,
+    this.styleClass,
   });
 
   final List<BrowseAssetEntity> allAssets;
@@ -34,6 +37,15 @@ class BrowseLoaded extends BrowseState {
   final String fileFormat;
   final BrowseSortOption sortOption;
 
+  /// Selected super category, null means "All"
+  final String? superCategory;
+
+  /// Selected sub-family / object category, null means "All"
+  final String? subCategory;
+
+  /// Selected style class, null means "All"
+  final String? styleClass;
+
   @override
   List<Object?> get props => [
         allAssets,
@@ -42,6 +54,9 @@ class BrowseLoaded extends BrowseState {
         label,
         fileFormat,
         sortOption,
+        superCategory,
+        subCategory,
+        styleClass,
       ];
 
   BrowseLoaded copyWith({
@@ -51,6 +66,9 @@ class BrowseLoaded extends BrowseState {
     String? label,
     String? fileFormat,
     BrowseSortOption? sortOption,
+    Object? superCategory = _sentinel,
+    Object? subCategory = _sentinel,
+    Object? styleClass = _sentinel,
   }) {
     return BrowseLoaded(
       allAssets: allAssets ?? this.allAssets,
@@ -59,9 +77,18 @@ class BrowseLoaded extends BrowseState {
       label: label ?? this.label,
       fileFormat: fileFormat ?? this.fileFormat,
       sortOption: sortOption ?? this.sortOption,
+      superCategory:
+          superCategory == _sentinel ? this.superCategory : superCategory as String?,
+      subCategory:
+          subCategory == _sentinel ? this.subCategory : subCategory as String?,
+      styleClass:
+          styleClass == _sentinel ? this.styleClass : styleClass as String?,
     );
   }
 }
+
+// Sentinel to distinguish "not provided" from explicit null in copyWith
+const _sentinel = Object();
 
 class BrowseFailureState extends BrowseState {
   const BrowseFailureState(this.message);

@@ -1,0 +1,86 @@
+/// Super categories with their corresponding sub-families (object categories).
+/// An empty list means no sub-family filter applies (e.g. Carpet).
+const Map<String, List<String>> kSuperCategories = {
+  'Chair': [
+    'Armchair',
+    'Ottoman',
+    'Vanity Chair',
+    'Desk Chair',
+    'Recliner Chair',
+    'Bar Stool',
+    'Dinner Chair',
+    'Rocking Chair',
+  ],
+  'Bed': [
+    'Single',
+    'Twin XL',
+    'Double',
+    'Queen',
+    'King',
+    'Super King',
+    'Emperor King',
+    'Bunk Bed',
+  ],
+  'Table': [
+    'Side Table',
+    'Dinner Table',
+    'Coffee Table',
+    'Desk Table',
+    'Meeting Table',
+    'Bar Counter',
+    'Nightstand Table',
+  ],
+  'Sofa': [
+    'Love Seats',
+    'Standard',
+    'Large',
+    'Sectional',
+    'Recliner Sofas',
+  ],
+  'Light': [
+    'Floor Mounted',
+    'Wall Mounted',
+    'Ceiling Mounted',
+    'Free Floating',
+  ],
+  'Window': [
+    'Casement',
+    'Double Hung',
+    'Awning',
+    'Sliding',
+    'Picture',
+    'Bay and Bow',
+    'Hopper',
+    'Skylight and Roof',
+  ],
+  'Door': [
+    'Panel Doors',
+    'Flush Doors',
+    'Glass Doors',
+    'Louvered Doors',
+  ],
+  'Storage': [
+    'Standalone Shelves',
+    'Wall Mounted Shelves',
+    'Built In Shelves',
+    'Walk In Closet',
+    'Reach In Closet',
+    'Wardrobe',
+  ],
+  'Cabinet': [
+    'Floor Cabinets',
+    'Wall Cabinets',
+    'Tall Cabinets',
+    'Corner Cabinets',
+  ],
+  'Carpet': [],
+};
+
+const List<String> kStyleClasses = [
+  'Minimalism',
+  'Bauhaus',
+  'Post Modern',
+  'French Classic',
+  'Industrial',
+  'Tropical',
+];

@@ -46,6 +46,9 @@ class BrowseCubit extends Cubit<BrowseState> {
           label: current.label,
           fileFormat: current.fileFormat,
           sortOption: current.sortOption,
+          superCategory: current.superCategory,
+          subCategory: current.subCategory,
+          styleClass: current.styleClass,
         ),
       ),
     );
@@ -63,6 +66,9 @@ class BrowseCubit extends Cubit<BrowseState> {
           label: label,
           fileFormat: current.fileFormat,
           sortOption: current.sortOption,
+          superCategory: current.superCategory,
+          subCategory: current.subCategory,
+          styleClass: current.styleClass,
         ),
       ),
     );
@@ -80,6 +86,9 @@ class BrowseCubit extends Cubit<BrowseState> {
           label: current.label,
           fileFormat: fileFormat,
           sortOption: current.sortOption,
+          superCategory: current.superCategory,
+          subCategory: current.subCategory,
+          styleClass: current.styleClass,
         ),
       ),
     );
@@ -97,6 +106,71 @@ class BrowseCubit extends Cubit<BrowseState> {
           label: current.label,
           fileFormat: current.fileFormat,
           sortOption: sortOption,
+          superCategory: current.superCategory,
+          subCategory: current.subCategory,
+          styleClass: current.styleClass,
+        ),
+      ),
+    );
+  }
+
+  /// Filter by super category. Clears sub-category when super category changes.
+  void filterBySuperCategory(String? superCategory) {
+    final current = state;
+    if (current is! BrowseLoaded) return;
+    emit(
+      current.copyWith(
+        superCategory: superCategory,
+        subCategory: null,
+        visibleAssets: _applyFilters(
+          assets: current.allAssets,
+          query: current.query,
+          label: current.label,
+          fileFormat: current.fileFormat,
+          sortOption: current.sortOption,
+          superCategory: superCategory,
+          subCategory: null,
+          styleClass: current.styleClass,
+        ),
+      ),
+    );
+  }
+
+  void filterBySubCategory(String? subCategory) {
+    final current = state;
+    if (current is! BrowseLoaded) return;
+    emit(
+      current.copyWith(
+        subCategory: subCategory,
+        visibleAssets: _applyFilters(
+          assets: current.allAssets,
+          query: current.query,
+          label: current.label,
+          fileFormat: current.fileFormat,
+          sortOption: current.sortOption,
+          superCategory: current.superCategory,
+          subCategory: subCategory,
+          styleClass: current.styleClass,
+        ),
+      ),
+    );
+  }
+
+  void filterByStyleClass(String? styleClass) {
+    final current = state;
+    if (current is! BrowseLoaded) return;
+    emit(
+      current.copyWith(
+        styleClass: styleClass,
+        visibleAssets: _applyFilters(
+          assets: current.allAssets,
+          query: current.query,
+          label: current.label,
+          fileFormat: current.fileFormat,
+          sortOption: current.sortOption,
+          superCategory: current.superCategory,
+          subCategory: current.subCategory,
+          styleClass: styleClass,
         ),
       ),
     );
@@ -108,6 +182,9 @@ class BrowseCubit extends Cubit<BrowseState> {
     required String label,
     required String fileFormat,
     required BrowseSortOption sortOption,
+    String? superCategory,
+    String? subCategory,
+    String? styleClass,
   }) {
     var result = assets;
     final q = query.trim().toLowerCase();
@@ -126,6 +203,9 @@ class BrowseCubit extends Cubit<BrowseState> {
     if (fileFormat != 'All') {
       result = result.where((a) => a.fileFormat == fileFormat).toList();
     }
+    // NOTE: superCategory / subCategory / styleClass filtering will be wired
+    // once the Browse API returns the full Model3dEntity fields. For now the
+    // local BrowseAssetEntity doesn't carry those fields, so we skip silently.
     result = [...result];
     switch (sortOption) {
       case BrowseSortOption.topRated:

@@ -34,9 +34,12 @@ import '../../features/home/presentation/manager/home_cubit/home_cubit.dart';
 
 // --- Browse ---
 import '../../features/browse/data/data_sources/browse_local_data_source.dart';
+import '../../features/browse/data/data_sources/browse_remote_data_source.dart';
 import '../../features/browse/data/repo/browse_repo_impl.dart';
+import '../../features/browse/domain/data_source/search_remote_data_source.dart';
 import '../../features/browse/domain/repo/browse_repo.dart';
 import '../../features/browse/presentation/manager/browse_cubit/browse_cubit.dart';
+import '../../features/browse/presentation/manager/search_cubit/search_cubit.dart';
 
 // --- Model Detail ---
 import '../../features/model_detail/data/data_sources/model_detail_remote_data_source_impl.dart';
@@ -129,12 +132,19 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<BrowseLocalDataSource>(
     () => BrowseLocalDataSourceImpl(),
   );
+  sl.registerLazySingleton<SearchRemoteDataSource>(
+    () => SearchRemoteDataSourceImpl(sl<ApiService>()),
+  );
 
   sl.registerLazySingleton<BrowseRepo>(
-    () => BrowseRepoImpl(sl<BrowseLocalDataSource>()),
+    () => BrowseRepoImpl(
+      sl<BrowseLocalDataSource>(),
+      sl<SearchRemoteDataSource>(),
+    ),
   );
 
   sl.registerFactory<BrowseCubit>(() => BrowseCubit(sl<BrowseRepo>()));
+  sl.registerFactory<SearchCubit>(() => SearchCubit(sl<BrowseRepo>()));
 
   // ─── Model Detail ─────────────────────────────────────────────────────────
   sl.registerLazySingleton<ModelDetailRemoteDataSource>(
